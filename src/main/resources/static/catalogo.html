@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Premium - KiusiHub</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/catalogo.css">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <h2 onclick="location.href='home.html'" style="cursor: pointer;">KiusiHub</h2>
+    <nav id="nav-user"></nav>
+</header>
+
+<!-- HEADER CATALOGO -->
+<section class="catalogo-header">
+    <h1>Nuestra Colección</h1>
+    <p>Descubre piezas únicas diseñadas para resaltar tu personalidad.</p>
+</section>
+
+<main class="container">
+
+    <!-- BOTÓN DE CAMBIO DE MONEDA -->
+    <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+        <button id="btn-convertir-catalogo" onclick="toggleCurrencyCatalogo()" class="btn-primary">
+            Mostrar precios en USD
+        </button>
+        <span id="moneda-actual-catalogo" style="font-weight: 600;">Moneda: COP</span>
+    </div>
+
+    <!-- FILTROS PREMIUM -->
+    <section class="filter-container-premium">
+        <div class="search-wrapper">
+            <input type="text" id="buscar-input" placeholder="¿Qué estás buscando hoy?">
+        </div>
+        
+        <select id="categoria-select" class="filter-select-premium">
+            <option value="">Todas las Categorías</option>
+            <!-- Categorías dinámicas -->
+        </select>
+    </section>
+
+    <!-- GRID DE PRODUCTOS -->
+    <section id="catalogo-grid" class="grid">
+        <!-- Se carga vía JavaScript -->
+        <div style="grid-column: 1/-1; text-align: center; padding: 5rem;">
+            <p>Preparando lo mejor de nuestra colección para ti...</p>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <div class="footer-content">
+        <p>&copy; 2026 KiusiHub. Todos los derechos reservados.</p>
+        <div class="footer-links">
+            <a href="home.html">Inicio</a>
+            <a href="vendedor.html">Vendedores</a>
+            <a href="login.html">Acceso Administrativo</a>
+        </div>
+    </div>
+</footer>
+
+<script src="js/ui.js"></script>
+<script src="js/catalogo.js"></script>
+
+</body>
+</html>

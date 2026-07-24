@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Bodega - KiusiHub</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/bodeguero.css">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <h2 onclick="location.href='home.html'" style="cursor: pointer;">KiusiHub</h2>
+    <nav id="nav-user"></nav>
+</header>
+
+<main class="container">
+
+    <div class="bodega-top">
+        <div>
+            <h1>Panel de Bodega</h1>
+            <p style="color: #666; margin: 0;">Gestiona el estado de los pedidos</p>
+        </div>
+        <div class="bodega-filtros" id="bodega-filtros">
+            <button class="estado-filter active" data-estado="">Todos</button>
+            <button class="estado-filter RECIBIDO" data-estado="RECIBIDO">RECIBIDO</button>
+            <button class="estado-filter SACADO" data-estado="SACADO">SACADO</button>
+            <button class="estado-filter REVISADO" data-estado="REVISADO">REVISADO</button>
+            <button class="estado-filter EMPACADO" data-estado="EMPACADO">EMPACADO</button>
+            <button class="estado-filter DESPACHADO" data-estado="DESPACHADO">DESPACHADO</button>
+        </div>
+    </div>
+
+    <section id="pedidos-container">
+        <!-- Pedidos cargados dinámicamente -->
+        <div style="text-align: center; padding: 4rem; color: #666;">
+            Cargando pedidos...
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <div class="footer-content">
+        <p>&copy; 2026 KiusiHub. Todos los derechos reservados.</p>
+        <div class="footer-links">
+            <a href="home.html">Inicio</a>
+            <a href="catalogo.html">Catálogo</a>
+            <a href="login.html">Acceso Administrativo</a>
+        </div>
+    </div>
+</footer>
+
+<script src="js/ui.js"></script>
+<script src="js/bodeguero.js"></script>
+
+</body>
+</html>

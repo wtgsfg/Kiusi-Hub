@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - KiusiHub</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/login.css">
+</head>
+
+<body class="login-body">
+
+<div class="login-container">
+    <h1>Login</h1>
+
+    <input id="username" placeholder="Nombre de usuario" type="text" autocomplete="username">
+    <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
+
+    <button onclick="login()" class="btn-primary">Entrar</button>
+
+    <button onclick="location.href='home.html'" class="btn-secondary" style="margin-top: 1rem;">
+        Volver al Inicio
+    </button>
+</div>
+
+<script src="js/ui.js"></script>
+<script src="js/login.js"></script>
+
+</body>
+</html>
