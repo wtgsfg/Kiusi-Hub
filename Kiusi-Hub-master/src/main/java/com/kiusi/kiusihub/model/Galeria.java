@@ -1,3 +1,6 @@
+//constructores de la galeria
+
+
 package com.kiusi.kiusihub.model;
 
 import java.time.LocalDateTime;
