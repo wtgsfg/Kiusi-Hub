@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galería | KiusiHub</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/home.css">
+
+    <style>
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #ff8c00 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            margin: 0;
+        }
+
+        .section {
+            padding: 3rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .section-title {
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 2.5rem;
+            font-size: 2rem;
+        }
+
+        .section-alt {
+            background: white;
+        }
+
+        .grid-imagenes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .imagen-card {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .imagen-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        }
+
+        .imagen-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .grid-videos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .video-card {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background: white;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .video-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        }
+
+        .video-card iframe {
+            width: 100%;
+            height: 200px;
+            border: none;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <h2>KiusiHub</h2>
+    <nav id="nav-user"></nav>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+    <h1>📸 Nuestra Historia</h1>
+    <p>Momentos que marcaron nuestro crecimiento</p>
+</div>
+
+<!-- GALERÍA DE IMÁGENES -->
+<div class="section">
+    <h2 class="section-title">Imágenes</h2>
+
+    <div class="grid-imagenes">
+        <div class="imagen-card">
+            <img src="https://picsum.photos/400/300?1" alt="Imagen 1">
+        </div>
+        <div class="imagen-card">
+            <img src="https://picsum.photos/400/300?2" alt="Imagen 2">
+        </div>
+        <div class="imagen-card">
+            <img src="https://picsum.photos/400/300?3" alt="Imagen 3">
+        </div>
+        <div class="imagen-card">
+            <img src="https://picsum.photos/400/300?4" alt="Imagen 4">
+        </div>
+        <div class="imagen-card">
+            <img src="https://picsum.photos/400/300?5" alt="Imagen 5">
+        </div>
+        <div class="imagen-card">
+            <img src="https://picsum.photos/400/300?6" alt="Imagen 6">
+        </div>
+    </div>
+</div>
+
+<!-- VIDEOS -->
+<div class="section section-alt">
+    <h2 class="section-title">🎥 Videos</h2>
+
+    <div class="grid-videos">
+        <div class="video-card">
+            <iframe src="https://www.youtube.com/embed/tgbNymZ7vqY" allowfullscreen></iframe>
+        </div>
+        <div class="video-card">
+            <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+        </div>
+    </div>
+</div>
+
+<!-- DETRÁS DE CÁMARA -->
+<div class="section">
+    <h2 class="section-title">🎬 Detrás de Cámara</h2>
+
+    <div class="grid-videos" id="detras-camara">
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2026 KiusiHub</p>
+    <div class="footer-links">
+        <a href="index.html">Inicio</a>
+        <a href="pedidos.html">Pedidos</a>
+        <a href="facturas.html">Facturas</a>
+        <a href="login.html">Login</a>
+        <a href="catalogo.html">Catálogo</a>
+        <a href="vendedor.html">Contactar con vendedor</a>
+    </div>
+    <p style="margin-top: 1rem;">Contacto: <a href="mailto:soporte@kiusihub.com">soporte@kiusihub.com</a></p>
+</footer>
+
+<script src="js/ui.js"></script>
+<script>
+    const videosDetrasCamara = [
+        "https://www.youtube.com/embed/jfKfPfyJRdk",
+        "https://www.youtube.com/embed/5qap5aO4i9A",
+        "https://www.youtube.com/embed/aqz-KE-bpKQ",
+        "https://www.youtube.com/embed/4XdINrZoXrE"
+    ];
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function renderDetrasCamara() {
+        const container = document.getElementById('detras-camara');
+        const shuffled = shuffleArray([...videosDetrasCamara]);
+        container.innerHTML = shuffled.map(url => `
+            <div class="video-card">
+                <iframe src="${url}" allowfullscreen></iframe>
+            </div>
+        `).join('');
+    }
+
+    renderDetrasCamara();
+</script>
+</body>
+</html>

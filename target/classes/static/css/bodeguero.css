@@ -1,0 +1,232 @@
+/* 📦 ESTILOS ESPECÍFICOS DEL BODEGUERO */
+.bodega-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.bodega-filtros {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.estado-filter {
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    font-size: 0.78rem;
+    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    box-shadow: none;
+}
+
+.estado-filter:hover {
+    transform: none;
+    opacity: 1;
+    background: rgba(15, 23, 42, 0.10);
+}
+
+.estado-filter.active {
+    background: rgba(15, 23, 42, 0.90);
+    color: white;
+    border-color: rgba(15, 23, 42, 0.90);
+}
+
+.estado-filter.RECIBIDO { background: #dbeafe; color: #1e40af; border-color: rgba(30, 64, 175, 0.18); }
+.estado-filter.SACADO { background: #fef3c7; color: #92400e; border-color: rgba(146, 64, 14, 0.18); }
+.estado-filter.REVISADO { background: #ede9fe; color: #5b21b6; border-color: rgba(91, 33, 182, 0.18); }
+.estado-filter.EMPACADO { background: #fce7f3; color: #9d174d; border-color: rgba(157, 23, 77, 0.18); }
+.estado-filter.DESPACHADO { background: #d1fae5; color: #065f46; border-color: rgba(6, 95, 70, 0.18); }
+
+.estado-filter.RECIBIDO.active,
+.estado-filter.SACADO.active,
+.estado-filter.REVISADO.active,
+.estado-filter.EMPACADO.active,
+.estado-filter.DESPACHADO.active {
+    filter: saturate(1.05);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);
+}
+
+.bodeguero-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+    color: white;
+    padding: 3rem 2rem;
+    text-align: center;
+}
+
+.bodeguero-header h1 {
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.bodeguero-header p {
+    color: #ddd;
+    margin: 0;
+}
+
+.pedido-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #3730a3;
+}
+
+.pedido-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pedido-info h3 {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 1.25rem;
+}
+
+.pedido-info p {
+    margin: 0.25rem 0 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.pedido-items {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.pedido-items h4 {
+    margin: 0 0 0.75rem;
+    color: var(--text-color);
+    font-size: 0.95rem;
+}
+
+.item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.item-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+}
+
+.item-list li:last-child {
+    border-bottom: none;
+}
+
+.item-nombre {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.item-cantidad {
+    color: #666;
+    font-weight: 500;
+}
+
+.pedido-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.status-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+}
+
+.status-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.status-btn.activo {
+    background: var(--primary-color);
+    color: white;
+}
+
+.status-btn.completado {
+    background: #10b981;
+    color: white;
+}
+
+.status-btn.pendiente {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.status-btn.activo:hover:not(:disabled) {
+    background: var(--primary-hover);
+}
+
+.estado-actual {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.estado-actual.RECIBIDO { background: #dbeafe; color: #1e40af; }
+.estado-actual.SACADO { background: #fef3c7; color: #92400e; }
+.estado-actual.REVISADO { background: #ede9fe; color: #5b21b6; }
+.estado-actual.EMPACADO { background: #fce7f3; color: #9d174d; }
+.estado-actual.DESPACHADO { background: #d1fae5; color: #065f46; }
+
+.observaciones-section {
+    background: #fff3cd;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.observaciones-section h4 {
+    margin: 0 0 0.5rem;
+    color: #856404;
+    font-size: 0.95rem;
+}
+
+.observaciones-section textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ffc107;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.sacado-section {
+    background: #d1fae5;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.sacado-section label {
+    font-size: 1rem;
+    color: #065f46;
+}

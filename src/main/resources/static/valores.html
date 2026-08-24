@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valores | KiusiHub</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/home.css">
+
+    <style>
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #ff8c00 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            margin: 0;
+        }
+
+        .valores-section {
+            padding: 3rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .valores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+        }
+
+        .valor-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+        }
+
+        .valor-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 36px rgba(2, 6, 23, 0.10);
+        }
+
+        .valor-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .valor-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.75rem;
+            font-size: 1.4rem;
+        }
+
+        .valor-card p {
+            color: #666;
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="navbar">
+    <h2>KiusiHub</h2>
+    <nav id="nav-user"></nav>
+</header>
+
+<div class="hero">
+    <h1>🔥 Nuestros Valores</h1>
+    <p>Lo que nos hace diferentes</p>
+</div>
+
+<div class="valores-section">
+    <div class="valores-grid">
+        <div class="valor-card">
+            <div class="valor-icon">💡</div>
+            <h3>Innovación</h3>
+            <p>Siempre buscamos nuevas formas de crecer y mejorar.</p>
+        </div>
+
+        <div class="valor-card">
+            <div class="valor-icon">🤝</div>
+            <h3>Compromiso</h3>
+            <p>Trabajamos con pasión y responsabilidad en cada proyecto.</p>
+        </div>
+
+        <div class="valor-card">
+            <div class="valor-icon">⚡</div>
+            <h3>Agilidad</h3>
+            <p>Nos adaptamos rápidamente al cambio y a las necesidades.</p>
+        </div>
+
+        <div class="valor-card">
+            <div class="valor-icon">🚀</div>
+            <h3>Crecimiento</h3>
+            <p>Impulsamos el éxito de nuestros clientes y colaboradores.</p>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>© 2026 KiusiHub</p>
+    <div class="footer-links">
+        <a href="index.html">Inicio</a>
+        <a href="pedidos.html">Pedidos</a>
+        <a href="facturas.html">Facturas</a>
+        <a href="login.html">Login</a>
+        <a href="catalogo.html">Catálogo</a>
+        <a href="vendedor.html">Contactar con vendedor</a>
+    </div>
+</footer>
+
+<script src="js/ui.js"></script>
+</body>
+</html>

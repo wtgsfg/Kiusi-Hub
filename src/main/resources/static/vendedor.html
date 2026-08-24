@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestros Asesores - KiusiHub</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/vendedor.css">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <h2 onclick="location.href='home.html'" style="cursor: pointer;">KiusiHub</h2>
+    <nav id="nav-user"></nav>
+</header>
+
+<main class="container">
+    
+    <!-- HEADER PREMIUM -->
+    <section class="vendedor-header">
+        <h1>Conoce a nuestros Expertos</h1>
+        <p>Asesoría personalizada para que encuentres el estilo perfecto.</p>
+        <div class="schedule-info">
+            🕒 <b>Horario de atención:</b> Lunes a Viernes 8:00 AM - 6:00 PM | Sábados 9:00 AM - 1:00 PM
+        </div>
+        <div class="vendedor-stats" aria-label="Resumen de asesores">
+            <div class="vendedor-stat">
+                <div class="vendedor-stat-value" id="stat-total">—</div>
+                <div class="vendedor-stat-label">Asesores</div>
+            </div>
+            <div class="vendedor-stat">
+                <div class="vendedor-stat-value" id="stat-online">—</div>
+                <div class="vendedor-stat-label">Disponibles</div>
+            </div>
+            <div class="vendedor-stat">
+                <div class="vendedor-stat-value">WhatsApp</div>
+                <div class="vendedor-stat-label">Respuesta rápida</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="vendedor-tools" aria-label="Buscar asesores">
+        <div class="vendedor-search">
+            <input id="vendedor-search" type="search" placeholder="Buscar asesor por nombre..." autocomplete="off">
+        </div>
+        <div class="vendedor-filters" aria-label="Filtros">
+            <button class="vendedor-chip is-active" type="button" data-filter="all">Todos</button>
+            <button class="vendedor-chip" type="button" data-filter="online">Disponibles</button>
+        </div>
+    </section>
+
+    <!-- GRID DINÁMICO DE VENDEDORES -->
+    <section id="vendedores-grid" class="vendedor-grid">
+        <!-- Se carga vía JavaScript -->
+        <div class="vendedor-empty" id="vendedor-loading">Buscando a nuestros mejores asesores...</div>
+    </section>
+
+</main>
+
+<footer>
+    <div class="footer-content">
+        <p>&copy; 2026 KiusiHub. Todos los derechos reservados.</p>
+        <div class="footer-links">
+            <a href="home.html">Inicio</a>
+            <a href="catalogo.html">Catálogo</a>
+            <a href="login.html">Acceso Staff</a>
+        </div>
+        <p style="margin-top: 20px;">¿Quieres ser parte del equipo? <a href="mailto:talento@kiusihub.com" style="color: var(--primary-color);">Contáctanos</a></p>
+    </div>
+</footer>
+
+<!-- LOGICA DINÁMICA -->
+<script src="js/ui.js"></script>
+<script src="js/vendedor.js"></script>
+
+</body>
+</html>
