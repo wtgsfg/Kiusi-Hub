@@ -1,0 +1,371 @@
+/* 🏠 ESTILOS ESPECÍFICOS DEL HOME */
+.hero {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #ff8c00 100%);
+    color: white;
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.hero h1 {
+    color: white;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    margin: 0;
+}
+
+.phrases-section {
+    margin: 2.5rem 0 3rem;
+}
+
+.phrases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+}
+
+.phrase-card {
+    background: white;
+    padding: 1.4rem 1.5rem;
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: rgba(15, 23, 42, 0.88);
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.phrase-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(2, 6, 23, 0.10);
+}
+
+.offering-section {
+    margin-bottom: 3rem;
+}
+
+.section-title {
+    text-align: center;
+    color: var(--text-color);
+    margin-bottom: 2.5rem;
+    font-size: 2rem;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.service-item {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.service-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.service-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+}
+
+.service-item h3 {
+    color: var(--text-color);
+    margin-bottom: 0.75rem;
+    font-size: 1.3rem;
+}
+
+.service-item p {
+    color: #666;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.home-link-btn {
+    margin-top: auto;
+    align-self: center;
+    padding: 10px 18px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    background: rgba(255, 90, 31, 0.10);
+    color: var(--primary-color);
+    border: 1px solid rgba(255, 90, 31, 0.20);
+    transition: all 0.25s;
+}
+
+.home-link-btn:hover {
+    background: rgba(255, 90, 31, 0.16);
+    transform: translateY(-1px);
+}
+
+.cta-section {
+    background: linear-gradient(135deg, #222 0%, #444 100%);
+    color: white;
+    padding: 3rem;
+    border-radius: 20px;
+    text-align: center;
+    margin-top: 3rem;
+}
+
+.cta-section h2 {
+    margin-bottom: 1rem;
+    font-size: 2rem;
+}
+
+.cta-section p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    color: #ddd;
+}
+
+.cta-btn {
+    background: var(--primary-color);
+    color: white;
+    padding: 15px 40px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: inline-block;
+    transition: all 0.3s;
+}
+
+.cta-btn:hover {
+    background: var(--primary-hover);
+    transform: scale(1.05);
+}
+
+.team-section {
+    margin-top: 3rem;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2rem;
+}
+
+.team-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.team-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.team-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    margin: 0 auto 1.5rem;
+    border: 4px solid var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    overflow: hidden;
+}
+
+.team-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.team-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: var(--text-color);
+}
+
+.team-role {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.team-bio {
+    color: #666;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.features {
+    margin-top: 3rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+}
+
+.feature-card {
+    background: white;
+    padding: 1.8rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    transition: all 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.feature-card h3 {
+    margin-top: 0;
+    margin-bottom: 0.6rem;
+    color: var(--text-color);
+}
+
+.feature-card p {
+    margin: 0;
+    color: #666;
+    line-height: 1.6;
+}
+
+/* 👥 ESTILOS DEL POPUP DEL EQUIPO */
+.team-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: white;
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    z-index: 1000;
+    width: 320px;
+    max-width: 90vw;
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    text-align: center;
+    border: 3px solid var(--primary-color);
+}
+
+.team-popup.show {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.team-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 999;
+    display: none;
+}
+
+.team-popup-overlay.show {
+    display: block;
+}
+
+.colombian-phrase {
+    background: linear-gradient(135deg, #ffdd00, #ffcc00);
+    padding: 0.75rem 1rem;
+    border-radius: 16px;
+    margin: 1rem 0;
+    font-weight: 800;
+    color: #333;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(255,204,0,0.3);
+}
+
+.popup-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.popup-avatar {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+}
+
+.popup-name {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin: 0;
+}
+
+.popup-role {
+    color: #666;
+    font-size: 1rem;
+    margin: 0.25rem 0 1rem;
+}
+
+.popup-caracteristicas {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    text-align: left;
+}
+
+.popup-caracteristicas li {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    font-weight: 600;
+    color: #333;
+}
+
+.popup-caracteristicas li::before {
+    content: "✨ ";
+}
+
+/* 📌 ESTILOS ADICIONALES DEL FOOTER */
+.footer-links.extra {
+    margin-top: 10px;
+}
+
+.footer-contact {
+    margin-top: 20px;
+}
+
+.footer-contact a {
+    color: var(--primary-color);
+}
+
+.footer-closed {
+    color: #ff5a1f;
+    font-weight: bold;
+    margin-top: 5px;
+}

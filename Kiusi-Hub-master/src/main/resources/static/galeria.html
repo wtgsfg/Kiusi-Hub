@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Galería | KiusiHub</title>
+
+    <link
+            rel="stylesheet"
+            href="css/global.css"
+    >
+
+    <link
+            rel="stylesheet"
+            href="css/home.css"
+    >
+
+    <link
+            rel="stylesheet"
+            href="css/galeria.css"
+    >
+
+</head>
+
+
+<body>
+
+<!-- =========================================
+     NAVBAR
+========================================= -->
+
+<header class="navbar">
+
+    <h2>KiusiHub</h2>
+
+    <nav id="nav-user"></nav>
+
+</header>
+
+
+<!-- =========================================
+     HERO
+========================================= -->
+
+<div class="hero">
+
+    <h1>📸 Nuestra Historia</h1>
+
+    <p>
+        Momentos que marcaron nuestro crecimiento
+    </p>
+
+</div>
+
+
+<!-- =========================================
+     GALERÍA
+========================================= -->
+
+<div class="section">
+
+    <h2 class="section-title">
+        Imágenes
+    </h2>
+
+
+    <!-- =====================================
+         PANEL ADMINISTRADOR
+    ====================================== -->
+
+    <div
+            id="panel-administrador"
+            class="panel-administrador"
+            style="display: none;"
+    >
+
+        <div class="panel-admin-contenido">
+
+            <div>
+
+                <h3>
+                    Administrar galería
+                </h3>
+
+                <p>
+                    Gestiona las fotografías de KiusiHub.
+                </p>
+
+            </div>
+
+
+            <button
+                    type="button"
+                    id="btn-agregar-foto"
+                    class="btn-admin"
+            >
+
+                <span>＋</span>
+
+                Agregar fotografía
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================
+         FILTROS
+    ====================================== -->
+
+    <div class="filtros-galeria">
+
+        <h3 class="filtros-titulo">
+            Filtrar fotografías
+        </h3>
+
+
+        <!-- FILTRO POR AÑO -->
+
+        <div class="filtros-grupo">
+
+            <label>
+                Año:
+            </label>
+
+            <div id="filtros-anio">
+
+                <button
+                        class="filtro-anio activo"
+                        data-anio="todos"
+                >
+                    Todos
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- FILTRO POR EVENTO -->
+
+        <div class="filtros-grupo">
+
+            <label for="filtro-evento">
+                Evento:
+            </label>
+
+            <select id="filtro-evento">
+
+                <option value="todos">
+                    Todos los eventos
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================
+         IMÁGENES
+    ====================================== -->
+
+    <div
+            class="grid-imagenes"
+            id="galeria-imagenes"
+    >
+
+        <p class="mensaje-galeria">
+            Cargando fotografías...
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     MODAL AGREGAR FOTOGRAFÍA
+========================================= -->
+
+<div
+        id="modal-fotografia"
+        class="modal-fotografia"
+        style="display: none;"
+>
+
+    <div class="modal-contenido">
+
+
+        <!-- HEADER DEL MODAL -->
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2>
+                    📸 Nueva fotografía
+                </h2>
+
+                <p>
+                    Agrega un nuevo momento a la historia de KiusiHub.
+                </p>
+
+            </div>
+
+
+            <button
+                    type="button"
+                    id="btn-cerrar-modal"
+                    class="btn-cerrar"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- =================================
+             FORMULARIO
+        ================================== -->
+
+        <form id="form-fotografia">
+
+
+            <!-- TÍTULO -->
+
+            <div class="campo-formulario">
+
+                <label for="titulo">
+                    Título
+                </label>
+
+                <input
+                        type="text"
+                        id="titulo"
+                        name="titulo"
+                        placeholder="Ej: Feria empresarial"
+                        required
+                >
+
+            </div>
+
+
+            <!-- DESCRIPCIÓN -->
+
+            <div class="campo-formulario">
+
+                <label for="descripcion">
+                    Descripción
+                </label>
+
+                <textarea
+                        id="descripcion"
+                        name="descripcion"
+                        rows="4"
+                        placeholder="Describe este momento..."
+                        required
+                ></textarea>
+
+            </div>
+
+
+            <!-- AÑO Y EVENTO -->
+
+            <div class="formulario-dos-columnas">
+
+
+                <!-- AÑO -->
+
+                <div class="campo-formulario">
+
+                    <label for="anio">
+                        Año
+                    </label>
+
+                    <input
+                            type="number"
+                            id="anio"
+                            name="anio"
+                            min="2000"
+                            max="2100"
+                            value="2026"
+                            required
+                    >
+
+                </div>
+
+
+                <!-- EVENTO -->
+
+                <div class="campo-formulario">
+
+                    <label for="evento">
+                        Evento
+                    </label>
+
+                    <input
+                            type="text"
+                            id="evento"
+                            name="evento"
+                            placeholder="Ej: Feria empresarial"
+                            required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================
+                 IMAGEN
+            ================================== -->
+
+            <div class="campo-formulario">
+
+                <label for="imagen">
+                    Fotografía
+                </label>
+
+
+                <div
+                        class="zona-imagen"
+                        id="zona-imagen"
+                >
+
+                    <div class="icono-subida">
+                        📁
+                    </div>
+
+                    <strong>
+                        Selecciona una fotografía
+                    </strong>
+
+                    <span>
+                        JPG, JPEG, PNG o WEBP · Máximo 5 MB
+                    </span>
+
+
+                    <label
+                            for="imagen"
+                            class="btn-seleccionar"
+                    >
+
+                        Seleccionar imagen
+
+                    </label>
+
+
+                    <input
+                            type="file"
+                            id="imagen"
+                            name="imagen"
+                            accept="image/png,image/jpeg,image/webp"
+                            required
+                    >
+
+
+                    <div
+                            id="nombre-imagen"
+                            class="nombre-imagen"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================
+                 MENSAJE
+            ================================== -->
+
+            <div
+                    id="mensaje-formulario"
+                    class="mensaje-formulario"
+            ></div>
+
+
+            <!-- =================================
+                 BOTONES
+            ================================== -->
+
+            <div class="modal-footer">
+
+                <button
+                        type="button"
+                        id="btn-cancelar"
+                        class="btn-cancelar"
+                >
+
+                    Cancelar
+
+                </button>
+
+
+                <button
+                        type="submit"
+                        id="btn-guardar"
+                        class="btn-guardar"
+                >
+
+                    Guardar fotografía
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     VIDEOS
+========================================= -->
+
+<div class="section section-alt">
+
+    <h2 class="section-title">
+        🎥 Videos
+    </h2>
+
+
+    <div class="grid-videos">
+
+
+        <div class="video-card">
+
+            <iframe
+                    src="https://www.youtube.com/embed/tgbNymZ7vqY"
+                    allowfullscreen>
+            </iframe>
+
+        </div>
+
+
+        <div class="video-card">
+
+            <iframe
+                    src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                    allowfullscreen>
+            </iframe>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     DETRÁS DE CÁMARA
+========================================= -->
+
+<div class="section">
+
+    <h2 class="section-title">
+        🎬 Detrás de Cámara
+    </h2>
+
+
+    <div
+            class="grid-videos"
+            id="detras-camara"
+    ></div>
+
+</div>
+
+
+<!-- =========================================
+     FOOTER
+========================================= -->
+
+<footer>
+
+    <p>
+        © 2026 KiusiHub
+    </p>
+
+
+    <div class="footer-links">
+
+        <a href="index.html">
+            Inicio
+        </a>
+
+        <a href="pedidos.html">
+            Pedidos
+        </a>
+
+        <a href="facturas.html">
+            Facturas
+        </a>
+
+        <a href="login.html">
+            Login
+        </a>
+
+        <a href="catalogo.html">
+            Catálogo
+        </a>
+
+        <a href="vendedor.html">
+            Contactar con vendedor
+        </a>
+
+    </div>
+
+
+    <p style="margin-top: 1rem;">
+
+        Contacto:
+
+        <a href="mailto:soporte@kiusihub.com">
+            soporte@kiusihub.com
+        </a>
+
+    </p>
+
+</footer>
+
+
+<!-- =========================================
+     JAVASCRIPT
+========================================= -->
+
+<script src="js/ui.js"></script>
+
+<script src="js/galeria.js"></script>
+
+</body>
+
+</html>

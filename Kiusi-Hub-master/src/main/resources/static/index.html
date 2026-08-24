@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KiusiHub - Gestión de Productos</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+<header class="navbar">
+    <h2>KiusiHub</h2>
+    <nav id="nav-user"></nav>
+</header>
+
+<main class="container">
+
+    <h1>Gestión Hector Produtos</h1>
+
+    <!-- Botón de conversión de moneda -->
+    <div style="margin-bottom: 1.5rem;">
+        <button id="btnConvertir" onclick="toggleCurrency()" class="btn-primary">
+            Mostrar precios en USD
+        </button>
+        <span id="currentCurrency" style="margin-left: 1rem; font-weight: 600;">Moneda actual: COP</span>
+    </div>
+
+    <!-- FORMULARIO -->
+    <section class="form">
+        <input id="id" type="hidden">
+
+        <input id="referencia" placeholder="Referencia">
+        <input id="nombre" placeholder="Nombre">
+        <input id="descripcion" placeholder="Descripción">
+        <input id="precio" type="number" placeholder="Precio">
+        <input id="stock" type="number" placeholder="Stock">
+        
+        <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 1rem; align-items: flex-start;">
+            <label for="imagen" style="font-weight: 600;">Imagen del producto:</label>
+            <input id="imagen" type="file" accept="image/*">
+            <div id="imagen-preview-container" style="display: none;">
+                <img id="imagen-preview" style="max-width: 200px; max-height: 200px; border-radius: 12px; box-shadow: var(--shadow);">
+                <button type="button" onclick="limpiarImagen()" class="btn-danger" style="margin-top: 0.5rem;">Quitar imagen</button>
+            </div>
+        </div>
+
+        <select id="categoria">
+            <option value="">Seleccionar categoría</option>
+            <option value="LLAVEROS">Llaveros</option>
+            <option value="PORTADOCUMENTOS">Portadocumentos</option>
+            <option value="MEDIAS">Medias</option>
+            <option value="BOLSOS">Bolsos</option>
+            <option value="MANOS_LIBRES">Manos libres</option>
+        </select>
+
+        <div class="form-buttons">
+            <button onclick="guardar()" class="btn-success">Guardar Producto</button>
+            <button onclick="limpiar()" class="btn-secondary">Limpiar Formulario</button>
+        </div>
+    </section>
+
+    <!-- LISTA -->
+    <section id="lista" class="grid"></section>
+
+</main>
+
+<footer>
+    <p>&copy; 2026 KiusiHub. Todos los derechos reservados.</p>
+    <div class="footer-links">
+        <a href="home.html">Inicio</a>
+        <a href="catalogo.html">Catálogo</a>
+        <a href="pedidos.html">Pedidos</a>
+    </div>
+</footer>
+
+<script src="js/ui.js"></script>
+<script src="js/productos.js"></script>
+
+</body>
+</html>
