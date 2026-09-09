@@ -10,6 +10,7 @@ public class Producto {
     private boolean activo;
     private String imagenUrl;
     private String categoria;
+    private Integer stockDisponible;
 
     public Producto() {
     }
@@ -88,5 +89,13 @@ public class Producto {
 
     public void setCategoria(String categoria) {
         this.categoria = categoria;
+    }
+
+    public Integer getStockDisponible() {
+        return stockDisponible;
+    }
+
+    public void setStockDisponible(Integer stockDisponible) {
+        this.stockDisponible = stockDisponible;
     }
 }

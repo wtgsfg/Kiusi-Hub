@@ -115,6 +115,47 @@ public class DatabaseMigrationRunner {
                         "ALTER TABLE productos ADD COLUMN activo TINYINT(1) DEFAULT 1");
             }
 
+            // --- RESERVAS DE STOCK (bloqueo temporal por vendedor) ---
+            safeExec("CREATE reservas_stock IF NOT EXISTS",
+                    "CREATE TABLE IF NOT EXISTS reservas_stock (" +
+                            "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                            "producto_id BIGINT NOT NULL, " +
+                            "vendedor_username VARCHAR(128) NOT NULL, " +
+                            "cantidad INT NOT NULL DEFAULT 0, " +
+                            "created_at DATETIME NOT NULL, " +
+                            "expires_at DATETIME NOT NULL, " +
+                            "INDEX idx_reservas_producto (producto_id), " +
+                            "INDEX idx_reservas_vendedor (vendedor_username), " +
+                            "INDEX idx_reservas_expira (expires_at), " +
+                            "UNIQUE KEY uk_reserva_producto_vendedor (producto_id, vendedor_username))");
+            if (!columnExists("reservas_stock", "producto_id")) {
+                safeExec("reservas_stock ADD producto_id BIGINT",
+                        "ALTER TABLE reservas_stock ADD COLUMN producto_id BIGINT NOT NULL DEFAULT 0");
+            }
+            if (!columnExists("reservas_stock", "vendedor_username")) {
+                safeExec("reservas_stock ADD vendedor_username VARCHAR(128)",
+                        "ALTER TABLE reservas_stock ADD COLUMN vendedor_username VARCHAR(128) NOT NULL DEFAULT ''");
+            }
+            if (!columnExists("reservas_stock", "cantidad")) {
+                safeExec("reservas_stock ADD cantidad INT",
+                        "ALTER TABLE reservas_stock ADD COLUMN cantidad INT NOT NULL DEFAULT 0");
+            }
+            if (!columnExists("reservas_stock", "created_at")) {
+                safeExec("reservas_stock ADD created_at DATETIME",
+                        "ALTER TABLE reservas_stock ADD COLUMN created_at DATETIME");
+            }
+            if (!columnExists("reservas_stock", "expires_at")) {
+                safeExec("reservas_stock ADD expires_at DATETIME",
+                        "ALTER TABLE reservas_stock ADD COLUMN expires_at DATETIME");
+            }
+            // Limpieza inicial de reservas vencidas al arrancar
+            try {
+                int n = jdbcTemplate.update("DELETE FROM reservas_stock WHERE expires_at < NOW()");
+                if (n > 0) System.out.println("[DB Migration] ✓ Limpieza inicial: " + n + " reserva(s) vencidas borradas");
+            } catch (Exception e) {
+                System.out.println("[DB Migration] ↷ No se pudo limpiar reservas vencidas (no crítico): " + e.getMessage());
+            }
+
             // --- NOTAS CREDITO ---
             // 1. Crear tablas si no existen
             safeExec("CREATE notas_credito IF NOT EXISTS",

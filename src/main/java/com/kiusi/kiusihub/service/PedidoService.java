@@ -19,17 +19,23 @@ public class PedidoService {
     private final PedidoRepository pedidoRepository;
     private final ItemPedidoRepository itemPedidoRepository;
     private final ProductoRepository productoRepository;
+    private final ReservaStockRepository reservaStockRepository;
+    private final StockReservaService stockReservaService;
     private final FacturaService facturaService;
 
     public PedidoService(
             PedidoRepository pedidoRepository,
             ItemPedidoRepository itemPedidoRepository,
             ProductoRepository productoRepository,
+            ReservaStockRepository reservaStockRepository,
+            StockReservaService stockReservaService,
             FacturaService facturaService
     ) {
         this.pedidoRepository = pedidoRepository;
         this.itemPedidoRepository = itemPedidoRepository;
         this.productoRepository = productoRepository;
+        this.reservaStockRepository = reservaStockRepository;
+        this.stockReservaService = stockReservaService;
         this.facturaService = facturaService;
     }
 
@@ -76,6 +82,11 @@ public class PedidoService {
             cantidadesPorProducto.merge(itemDto.getProductoId(), itemDto.getCantidad(), Integer::sum);
         }
 
+        // Primero validar DISPONIBILIDAD REAL (físico - reservado por OTROS)
+        // Si el vendedor tenía reserva, al quitar su propia reserva del cálculo para no doble-contar.
+        final String vendedor = pedido.getVendedor();
+        Map<Long, Integer> misReservas = stockReservaService.misReservas(vendedor);
+
         for (Map.Entry<Long, Integer> entry : cantidadesPorProducto.entrySet()) {
             Long productoId = entry.getKey();
             int cantidad = entry.getValue();
@@ -83,10 +94,22 @@ public class PedidoService {
             Producto producto = productoRepository.findById(productoId)
                     .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 
-            if (producto.getStock() < cantidad) {
-                throw new RuntimeException("Stock insuficiente para el producto: " + producto.getNombre());
+            int reservadoTotal = reservaStockRepository.sumReservasActivasProducto(productoId);
+            int reservaMia = misReservas.getOrDefault(productoId, 0);
+            int reservadoOtros = Math.max(0, reservadoTotal - reservaMia);
+            int disponibleReal = Math.max(0, producto.getStock() - reservadoOtros);
+
+            if (disponibleReal < cantidad) {
+                if (reservaMia > 0 && reservadoOtros > 0) {
+                    throw new RuntimeException("Stock insuficiente para \"" + producto.getNombre() +
+                            "\". Disponible real (quitando a otros vendedores): " + disponibleReal +
+                            ". Otro vendedor tiene apartado: " + reservadoOtros + ".");
+                }
+                throw new RuntimeException("Stock insuficiente para el producto: " + producto.getNombre() +
+                        " (disponible " + disponibleReal + " de " + producto.getStock() + ")");
             }
 
+            // Restar del stock FÍSICO (ya no es una reserva, es una venta confirmada)
             producto.setStock(producto.getStock() - cantidad);
             productoRepository.save(producto);
 
@@ -100,6 +123,9 @@ public class PedidoService {
             itemsGuardados.add(itemPedidoRepository.save(item));
             total += producto.getPrecio() * cantidad;
         }
+
+        // Confirmar: borrar las reservas que este vendedor tenía para los productos del pedido
+        stockReservaService.confirmarPedido(vendedor, cantidadesPorProducto);
 
         pedidoGuardado.setTotal(total);
         pedidoGuardado.setItems(itemsGuardados);
