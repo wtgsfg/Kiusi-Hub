@@ -23,6 +23,39 @@ public class FacturaRepository {
 
     public FacturaRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        repararFacturasSinVendedor();
+        repararFacturasSinCliente();
+    }
+
+    private void repararFacturasSinVendedor() {
+        try {
+            String sql =
+                "UPDATE facturas f " +
+                "INNER JOIN pedidos p ON f.pedido_id = p.id " +
+                "SET f.vendedor = p.vendedor " +
+                "WHERE (f.vendedor IS NULL OR TRIM(f.vendedor) = '') " +
+                "AND p.vendedor IS NOT NULL AND TRIM(p.vendedor) <> ''";
+            int n = jdbcTemplate.update(sql);
+            if (n > 0) System.out.println("[FacturaRepository] ✓ Reparadas " + n + " facturas: vendedor rellenado desde pedidos");
+        } catch (Exception e) {
+            System.out.println("[FacturaRepository] ↷ skip reparar vendedor facturas: " + e.getMessage());
+        }
+    }
+
+    private void repararFacturasSinCliente() {
+        try {
+            String sql =
+                "UPDATE facturas f " +
+                "INNER JOIN pedidos p ON f.pedido_id = p.id " +
+                "SET f.cliente = COALESCE(NULLIF(p.cliente,''), f.cliente), " +
+                "    f.nombre_cliente = COALESCE(NULLIF(p.cliente,''), f.nombre_cliente) " +
+                "WHERE ((f.cliente IS NULL OR TRIM(f.cliente) = '') OR (f.nombre_cliente IS NULL OR TRIM(f.nombre_cliente) = '')) " +
+                "AND p.cliente IS NOT NULL AND TRIM(p.cliente) <> ''";
+            int n = jdbcTemplate.update(sql);
+            if (n > 0) System.out.println("[FacturaRepository] ✓ Reparadas " + n + " facturas: cliente rellenado desde pedidos");
+        } catch (Exception e) {
+            System.out.println("[FacturaRepository] ↷ skip reparar cliente facturas: " + e.getMessage());
+        }
     }
 
     public List<Factura> findAll() {
@@ -310,25 +343,43 @@ public class FacturaRepository {
             for (int i = 1; i <= cols; i++) colNames.add(md.getColumnLabel(i).toLowerCase());
 
             factura.setId(rs.getLong("id"));
-            try { factura.setPedidoId(rs.getLong("pedido_id")); } catch (SQLException ignored) {}
+            Long pedidoId = null;
+            try {
+                pedidoId = rs.getLong("pedido_id");
+                if (rs.wasNull()) pedidoId = null;
+                factura.setPedidoId(pedidoId);
+            } catch (SQLException ignored) {}
             try { factura.setTotal(rs.getDouble("total")); } catch (SQLException ignored) {}
             try { factura.setPagado(rs.getDouble("pagado")); } catch (SQLException ignored) {}
+
+            // --- CLIENTE ---
+            String cliente = null;
             try {
                 String c = rs.getString("cliente");
                 if (c != null && !c.isBlank()) {
-                    factura.setNombreCliente(c);
+                    cliente = c;
                 } else {
                     String nc = rs.getString("nombre_cliente");
-                    if (nc != null) factura.setNombreCliente(nc);
+                    if (nc != null && !nc.isBlank()) cliente = nc;
                 }
             } catch (SQLException e) {
                 try {
-                    factura.setNombreCliente(rs.getString("nombre_cliente"));
+                    String nc = rs.getString("nombre_cliente");
+                    if (nc != null && !nc.isBlank()) cliente = nc;
                 } catch (SQLException ignored) {}
             }
+            factura.setNombreCliente(cliente != null ? cliente : "");
+
+            // --- VENDEDOR ---
+            String vendedor = null;
             if (colNames.contains("vendedor")) {
-                try { factura.setVendedor(rs.getString("vendedor")); } catch (SQLException ignored) {}
+                try {
+                    String v = rs.getString("vendedor");
+                    if (v != null && !v.isBlank()) vendedor = v;
+                } catch (SQLException ignored) {}
             }
+            factura.setVendedor(vendedor != null ? vendedor : "");
+
             try { factura.setSaldo(rs.getDouble("saldo")); } catch (SQLException ignored) {}
             try {
                 String est = rs.getString("estado");

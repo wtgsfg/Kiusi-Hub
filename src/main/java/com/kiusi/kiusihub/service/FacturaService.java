@@ -4,20 +4,29 @@ import com.kiusi.kiusihub.exception.ResourceNotFoundException;
 import com.kiusi.kiusihub.model.Factura;
 import com.kiusi.kiusihub.model.Pedido;
 import com.kiusi.kiusihub.repository.FacturaRepository;
+import com.kiusi.kiusihub.repository.PedidoRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class FacturaService {
 
     private final FacturaRepository facturaRepository;
+    private final PedidoRepository pedidoRepository;
+    private final JdbcTemplate jdbcTemplate;
 
-    public FacturaService(FacturaRepository facturaRepository) {
+    public FacturaService(FacturaRepository facturaRepository,
+                          PedidoRepository pedidoRepository,
+                          JdbcTemplate jdbcTemplate) {
         this.facturaRepository = facturaRepository;
+        this.pedidoRepository = pedidoRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public List<Factura> findAll() {
@@ -50,10 +59,45 @@ public class FacturaService {
     }
 
     public Factura createFromPedido(Pedido pedido, double total) {
+        Long pedidoId = pedido.getId();
+        String cliente = pedido.getCliente();
+        String vendedor = pedido.getVendedor();
+
+        // 1er fallback: si vendedor o cliente vienen nulos, recargar pedido completo desde BD
+        if ((vendedor == null || vendedor.isBlank() || cliente == null || cliente.isBlank()) && pedidoId != null) {
+            try {
+                Optional<Pedido> optPedido = pedidoRepository.findById(pedidoId);
+                if (optPedido.isPresent()) {
+                    Pedido p = optPedido.get();
+                    if (cliente == null || cliente.isBlank()) cliente = p.getCliente();
+                    if (vendedor == null || vendedor.isBlank()) vendedor = p.getVendedor();
+                }
+            } catch (Exception ignored) {}
+        }
+
+        // 2do fallback: si aún así vendedor/cliente vienen nulos, consultar directamente la fila de pedidos
+        if (pedidoId != null && (vendedor == null || vendedor.isBlank() || cliente == null || cliente.isBlank())) {
+            try {
+                Map<String, Object> row = jdbcTemplate.queryForMap(
+                        "SELECT cliente, vendedor FROM pedidos WHERE id = ? LIMIT 1", pedidoId);
+                if (row != null) {
+                    Object c = row.get("cliente");
+                    Object v = row.get("vendedor");
+                    if ((cliente == null || cliente.isBlank()) && c != null) cliente = String.valueOf(c);
+                    if ((vendedor == null || vendedor.isBlank()) && v != null) vendedor = String.valueOf(v);
+                }
+            } catch (Exception ignored) {}
+        }
+
+        // Si después de todo aún es nulo, mostrar en log para debug
+        if (vendedor == null || vendedor.isBlank()) {
+            System.err.println("[FacturaService] ⚠️ VENDEDOR NULL al crear factura para pedido_id=" + pedidoId);
+        }
+
         Factura factura = new Factura();
-        factura.setPedidoId(pedido.getId());
-        factura.setNombreCliente(pedido.getCliente());
-        factura.setVendedor(pedido.getVendedor());
+        factura.setPedidoId(pedidoId);
+        factura.setNombreCliente(cliente != null ? cliente : "");
+        factura.setVendedor(vendedor != null ? vendedor : "");
         factura.setTotal(total);
         factura.setPagado(0);
         factura.setEstado("PENDIENTE");
