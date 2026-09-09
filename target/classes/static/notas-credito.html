@@ -1,0 +1,503 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notas de Crédito - KiusiHub</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .nc-row {
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            padding: 22px;
+            margin-bottom: 18px;
+            border: 2px solid transparent;
+            transition: all 0.25s ease;
+        }
+
+        .nc-row:hover {
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .nc-row.anulada {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
+            border-color: #28a745 !important;
+            box-shadow: 0 4px 14px rgba(40, 167, 69, 0.22) !important;
+        }
+
+        .nc-row.anulada:hover {
+            box-shadow: 0 6px 22px rgba(40, 167, 69, 0.34) !important;
+        }
+
+        .nc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .nc-header h3 {
+            margin: 0;
+            color: #212529;
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+        .nc-row.anulada .nc-header h3::after {
+            content: " · ✅ ANULADA";
+            color: #155724;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+        }
+
+        .nc-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn-small {
+            padding: 10px 18px;
+            font-size: 14px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-small:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            box-shadow: 0 3px 10px rgba(23, 162, 184, 0.25);
+        }
+
+        .btn-factura {
+            background: linear-gradient(135deg, #007bff 0%, #0062cc 100%);
+            color: white;
+            box-shadow: 0 3px 10px rgba(0, 123, 255, 0.25);
+            text-decoration: none;
+        }
+
+        .btn-anular {
+            background: linear-gradient(135deg, #fd7e14 0%, #d65500 100%);
+            color: white;
+            box-shadow: 0 3px 10px rgba(253, 126, 20, 0.28);
+        }
+
+        .btn-anular:disabled {
+            background: #adb5bd !important;
+            background-image: none !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+            opacity: 0.75 !important;
+            box-shadow: none !important;
+        }
+
+        .nc-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            background: rgba(248, 249, 250, 0.65);
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .info-label {
+            font-size: 11px;
+            color: #6c757d;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #212529;
+            word-break: break-word;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+        }
+
+        .badge.activa {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .badge.anulada-badge {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #a3d9a5;
+        }
+
+        .nc-detail {
+            display: none;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px dashed #adb5bd;
+        }
+
+        .nc-detail.open {
+            display: block;
+            animation: slideDown 0.32s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #495057;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .items-table-container {
+            border: 1px solid #e9ecef;
+            border-radius: 14px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .items-table th,
+        .items-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #f1f3f5;
+            font-size: 14px;
+        }
+
+        .items-table th {
+            background: #f8f9fa;
+            font-weight: 700;
+            color: #495057;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .items-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .items-table tfoot td {
+            background: #fff3cd !important;
+            font-weight: 800;
+            font-size: 15px;
+            color: #856404 !important;
+        }
+
+        .nc-row.anulada .items-table tfoot td {
+            background: #c3e6cb !important;
+            color: #155724 !important;
+        }
+
+        .items-empty {
+            text-align: center;
+            padding: 60px 30px;
+            background: white;
+            border-radius: 18px;
+            color: #6c757d;
+            font-size: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+            text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card.anulada-card .stat-value { color: #28a745; }
+        .stat-card.activas-card .stat-value { color: #ffc107; }
+        .stat-card.total-card   .stat-value { color: var(--primary-color); }
+        .stat-card.monto-card   .stat-value { color: #6f42c1; }
+
+        .leyenda-box {
+            margin-bottom: 22px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #fff8e1 0%, #fff 100%);
+            border: 2px solid #ffe08a;
+            color: #856404;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(255, 193, 7, 0.15);
+            line-height: 1.7;
+        }
+
+        .leyenda-verde {
+            margin-top: 10px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #d4edda 0%, #e7f7ea 100%);
+            border: 2px solid #28a745;
+            color: #155724;
+            font-weight: 700;
+        }
+
+        .btn-primary-nc {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ff5a1f 0%, #ff7a45 100%);
+            color: white;
+            text-decoration: none;
+            font-weight: 800;
+            box-shadow: 0 5px 16px rgba(255, 90, 31, 0.32);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .btn-primary-nc:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 22px rgba(255, 90, 31, 0.40);
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 22px;
+            align-items: center;
+        }
+
+        .toolbar input,
+        .toolbar select {
+            padding: 11px 16px;
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+            font-size: 14px;
+            background: white;
+            font-weight: 600;
+            color: #333;
+            outline: none;
+            transition: all 0.15s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .toolbar input:focus,
+        .toolbar select:focus {
+            border-color: #ff5a1f;
+            box-shadow: 0 0 0 3px rgba(255, 90, 31, 0.18);
+        }
+
+        .toolbar input { flex: 1 1 230px; min-width: 200px; }
+
+        .btn-refresh {
+            padding: 11px 18px;
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+            background: white;
+            font-weight: 700;
+            cursor: pointer;
+            color: #495057;
+            transition: all 0.15s ease;
+        }
+
+        .btn-refresh:hover {
+            background: #f8f9fa;
+            border-color: #ced4da;
+        }
+
+        .cargando {
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 4px solid rgba(255, 90, 31, 0.2);
+            border-top-color: #ff5a1f;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+
+<body>
+
+<header class="navbar">
+    <h2 onclick="location.href='home.html'"
+        style="cursor: pointer; user-select: none;"
+        title="Ir al inicio">KiusiHub</h2>
+    <nav id="nav-user"></nav>
+</header>
+
+<main class="container">
+
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 14px; margin-bottom: 18px;">
+        <div>
+            <h1 style="margin: 0 0 6px 0;">💳 Gestión de Notas de Crédito</h1>
+            <p style="margin: 0; color: #6c757d;">
+                Historial de devoluciones y ajustes de facturas · Consulta, anula y sigue el estado de cada nota.
+            </p>
+        </div>
+        <a href="facturas.html" class="btn-primary-nc">
+            🧾 Generar NC (Ir a Facturas)
+        </a>
+    </div>
+
+    <div class="toolbar">
+        <input type="text" id="buscador-notas"
+               placeholder="🔍 Buscar por # Nota, # Factura o Motivo..."
+               oninput="aplicarFiltros()">
+        <select id="filtro-estado" onchange="aplicarFiltros()">
+            <option value="todas">📋 Todas las notas</option>
+            <option value="activas">📌 Solo activas</option>
+            <option value="anuladas">✅ Solo anuladas</option>
+        </select>
+        <button onclick="cargarNotas(true)" class="btn-refresh" title="Volver a cargar desde el servidor">
+            🔄 Refrescar
+        </button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card total-card">
+            <div class="stat-value" id="stat-total">0</div>
+            <div class="stat-label">Total Notas</div>
+        </div>
+        <div class="stat-card activas-card">
+            <div class="stat-value" id="stat-activas">0</div>
+            <div class="stat-label">Activas</div>
+        </div>
+        <div class="stat-card anulada-card">
+            <div class="stat-value" id="stat-anuladas">0</div>
+            <div class="stat-label">Anuladas</div>
+        </div>
+        <div class="stat-card monto-card">
+            <div class="stat-value" id="stat-monto">$0</div>
+            <div class="stat-label">Monto Activo Devuelto</div>
+        </div>
+    </div>
+
+    <div class="leyenda-box">
+        📌 <b>Cómo funciona esta sección:</b>
+        <ul style="margin: 8px 0 0 18px; padding: 0; line-height: 1.85;">
+            <li>Al crear una nota de crédito desde <b>Facturas</b>: los productos <b>vuelven al stock</b> y la factura <b>disminuye su total</b>.</li>
+            <li>Al dar clic en <b>↩️ Anular</b>: los productos se <b>retiran del stock</b> y la factura <b>recupera su monto original</b>.</li>
+        </ul>
+        <div class="leyenda-verde">
+            ✅ <b>Importante:</b> Las tarjetas con fondo VERDE son notas <b>ANULADAS</b> (la operación fue revertida).
+        </div>
+    </div>
+
+    <section id="lista-notas">
+        <div class="cargando">
+            <div class="spinner"></div>
+            <div>Cargando notas de crédito...</div>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <div class="footer-content">
+        <p>&copy; 2026 KiusiHub. Todos los derechos reservados.</p>
+        <div class="footer-links">
+            <a href="index.html">Productos</a>
+            <a href="pedidos.html">Pedidos</a>
+            <a href="facturas.html">Facturas</a>
+            <a href="notas-credito.html">Notas Crédito</a>
+            <a href="catalogo.html">Catálogo</a>
+            <a href="vendedor.html">Vendedor</a>
+        </div>
+        <div class="footer-links" style="margin-top: 10px;">
+            <a href="mision.html">Misión y Visión</a>
+            <a href="valores.html">Valores</a>
+            <a href="galeria.html">Galería</a>
+        </div>
+        <div class="footer-schedule">
+            <span>📅 <b>Horarios de Disponibilidad:</b></span>
+            <span>Lunes a Viernes: 08:00 - 18:00</span>
+            <span>Sábados: 09:00 - 13:00</span>
+            <span style="color: #ff5a1f; font-weight: bold; margin-top: 5px;">¡Domingos y Festivos: Cerrado!</span>
+        </div>
+        <p style="margin-top: 20px;">Contacto:
+            <a href="mailto:soporte@kiusihub.com" style="color: var(--primary-color);">soporte@kiusihub.com</a>
+        </p>
+    </div>
+</footer>
+
+<script src="js/ui.js"></script>
+<script src="js/notas-credito.js"></script>
+
+</body>
+</html>

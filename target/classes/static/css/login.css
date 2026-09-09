@@ -1,0 +1,48 @@
+/* 🔐 ESTILOS ESPECÍFICOS DEL LOGIN */
+.login-body {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #ff8c00 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.login-container {
+    background: white;
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-container h1 {
+    color: var(--text-color);
+    margin-bottom: 2rem;
+    font-size: 2rem;
+}
+
+.login-container input {
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid #f0f0f0;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.login-container input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.login-container .btn-primary {
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+}

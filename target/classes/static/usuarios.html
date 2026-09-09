@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - KiusiHub</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <h2>KiusiHub (Admin)</h2>
+    <nav id="nav-user"></nav>
+</header>
+
+<main class="container">
+
+    <h1>Gestión de Usuarios</h1>
+
+    <!-- FORMULARIO -->
+    <section class="form">
+        <div style="grid-column: 1/-1"><h3 style="margin-top: 0; color: var(--primary-color);">Registrar / Editar Usuario</h3></div>
+        <input id="id" type="hidden">
+        <input id="username" placeholder="Nombre de usuario" type="text" autocomplete="username">
+        <input id="password" type="password" placeholder="Contraseña (solo para crear o cambiar)">
+        
+        <select id="rol">
+            <option value="">Seleccionar Rol</option>
+            <option value="ADMIN">Administrador</option>
+            <option value="VENDEDOR">Vendedor</option>
+            <option value="CARTERA">Cartera</option>
+            <option value="BODEGUERO">Bodeguero</option>
+        </select>
+
+        <div class="form-buttons">
+            <button onclick="guardar()" class="btn-success">Guardar Usuario</button>
+            <button onclick="limpiar()" class="btn-secondary">Limpiar Formulario</button>
+        </div>
+    </section>
+
+    <!-- LISTA -->
+    <section id="lista" class="grid"></section>
+
+</main>
+
+<footer>
+    <div class="footer-content">
+        <p>&copy; 2026 KiusiHub. Todos los derechos reservados.</p>
+        <div class="footer-links">
+            <a href="index.html">Productos</a>
+            <a href="pedidos.html">Pedidos</a>
+            <a href="facturas.html">Facturas</a>
+            <a href="catalogo.html">Catálogo</a>
+            <a href="vendedor.html">Vendedor</a>
+        </div>
+        <div class="footer-links" style="margin-top: 10px;">
+            <a href="mision.html">Misión y Visión</a>
+            <a href="valores.html">Valores</a>
+            <a href="galeria.html">Galería</a>
+        </div>
+        <div class="footer-schedule">
+            <span>📅 <b>Horarios de Disponibilidad:</b></span>
+            <span>Lunes a Viernes: 08:00 - 18:00</span>
+            <span>Sábados: 09:00 - 13:00</span>
+            <span style="color: #ff5a1f; font-weight: bold; margin-top: 5px;">¡Domingos y Festivos: Cerrado!</span>
+        </div>
+        <p style="margin-top: 20px;">Contacto: <a href="mailto:soporte@kiusihub.com" style="color: var(--primary-color);">soporte@kiusihub.com</a></p>
+    </div>
+</footer>
+
+<script src="js/ui.js"></script>
+<script src="js/usuarios.js"></script>
+
+</body>
+</html>

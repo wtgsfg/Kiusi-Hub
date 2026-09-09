@@ -1,0 +1,827 @@
+/* =========================================
+   HERO
+========================================= */
+
+.hero {
+    background: linear-gradient(
+        135deg,
+        var(--primary-color) 0%,
+        #ff8c00 100%
+    );
+
+    color: white;
+
+    padding: 4rem 2rem;
+
+    text-align: center;
+}
+
+.hero h1 {
+    color: white;
+
+    font-size: 2.5rem;
+
+    margin-bottom: 0.5rem;
+}
+
+.hero p {
+    font-size: 1.2rem;
+
+    opacity: 0.95;
+
+    margin: 0;
+}
+
+
+/* =========================================
+   SECCIONES
+========================================= */
+
+.section {
+    padding: 3rem 2rem;
+
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    width: 100%;
+
+    box-sizing: border-box;
+}
+
+.section-title {
+    text-align: center;
+
+    color: var(--text-color);
+
+    margin-bottom: 2.5rem;
+
+    font-size: 2rem;
+}
+
+.section-alt {
+    background: white;
+}
+
+
+/* =========================================
+   FILTROS
+========================================= */
+
+.filtros-galeria {
+    background: white;
+
+    padding: 1.5rem;
+
+    border-radius: 16px;
+
+    box-shadow: var(--shadow);
+
+    margin-bottom: 2rem;
+}
+
+.filtros-titulo {
+    margin-top: 0;
+
+    margin-bottom: 1rem;
+
+    color: var(--text-color);
+}
+
+.filtros-grupo {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 0.7rem;
+
+    align-items: center;
+
+    margin-bottom: 1rem;
+}
+
+.filtros-grupo:last-child {
+    margin-bottom: 0;
+}
+
+.filtros-grupo label {
+    font-weight: bold;
+
+    margin-right: 0.5rem;
+}
+
+.filtro-anio {
+    border: none;
+
+    padding: 0.6rem 1rem;
+
+    border-radius: 20px;
+
+    cursor: pointer;
+
+    background: #eeeeee;
+
+    color: var(--text-color);
+
+    transition: all 0.3s ease;
+}
+
+.filtro-anio:hover {
+    transform: translateY(-2px);
+}
+
+.filtro-anio.activo {
+    background: var(--primary-color);
+
+    color: white;
+}
+
+#filtro-evento {
+    padding: 0.7rem 1rem;
+
+    border: 1px solid #ddd;
+
+    border-radius: 8px;
+
+    min-width: 250px;
+
+    background: white;
+
+    font-size: 1rem;
+}
+
+
+/* =========================================
+   PANEL ADMINISTRADOR
+========================================= */
+
+.panel-administrador {
+    background: white;
+
+    border-radius: 16px;
+
+    padding: 1.5rem;
+
+    margin-bottom: 2rem;
+
+    box-shadow: var(--shadow);
+
+    border-left: 5px solid var(--primary-color);
+}
+
+.panel-admin-contenido {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 1rem;
+}
+
+.panel-administrador h3 {
+    margin: 0 0 0.4rem;
+
+    color: var(--text-color);
+
+    font-size: 1.3rem;
+}
+
+.panel-administrador p {
+    margin: 0;
+
+    color: #777;
+}
+
+
+/* =========================================
+   BOTÓN ADMIN
+========================================= */
+
+.btn-admin {
+    border: none;
+
+    background: var(--primary-color);
+
+    color: white;
+
+    padding: 0.8rem 1.3rem;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    font-size: 0.95rem;
+
+    font-weight: bold;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.btn-admin:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.btn-admin span {
+    font-size: 1.2rem;
+}
+
+
+/* =========================================
+   GALERÍA DE IMÁGENES
+========================================= */
+
+.grid-imagenes {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(240px, 1fr)
+        );
+
+    gap: 1.5rem;
+}
+
+.imagen-card {
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    box-shadow: var(--shadow);
+
+    background: white;
+
+    transition:
+        transform 0.3s,
+        box-shadow 0.3s;
+}
+
+.imagen-card:hover {
+    transform: translateY(-6px);
+
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.imagen-card img {
+    width: 100%;
+
+    height: 200px;
+
+    object-fit: cover;
+
+    display: block;
+}
+
+.imagen-info {
+    padding: 1rem;
+}
+
+.imagen-info h3 {
+    margin: 0 0 0.5rem;
+
+    color: var(--text-color);
+}
+
+.imagen-info p {
+    margin: 0 0 0.7rem;
+
+    color: #666;
+
+    line-height: 1.5;
+}
+
+.imagen-meta {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 0.5rem;
+}
+
+.imagen-meta span {
+    background: #f1f1f1;
+
+    padding: 0.3rem 0.7rem;
+
+    border-radius: 15px;
+
+    font-size: 0.85rem;
+}
+
+
+/* =========================================
+   MENSAJES
+========================================= */
+
+.mensaje-galeria {
+    text-align: center;
+
+    padding: 2rem;
+
+    color: #666;
+
+    grid-column: 1 / -1;
+}
+
+.error-galeria {
+    color: #c0392b;
+}
+
+
+/* =========================================
+   MODAL
+========================================= */
+
+.modal-fotografia {
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(15, 23, 42, 0.72);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 1.5rem;
+
+    z-index: 9999;
+
+    backdrop-filter: blur(5px);
+}
+
+
+/* =========================================
+   CONTENIDO MODAL
+========================================= */
+
+.modal-contenido {
+    width: 100%;
+
+    max-width: 650px;
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    background: white;
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.25);
+
+    animation:
+        aparecerModal 0.25s ease;
+}
+
+@keyframes aparecerModal {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(-20px)
+            scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+
+}
+
+
+/* =========================================
+   HEADER MODAL
+========================================= */
+
+.modal-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    padding: 1.5rem 1.7rem;
+
+    border-bottom: 1px solid #eee;
+}
+
+.modal-header h2 {
+    margin: 0 0 0.4rem;
+
+    color: var(--text-color);
+
+    font-size: 1.5rem;
+}
+
+.modal-header p {
+    margin: 0;
+
+    color: #777;
+
+    font-size: 0.9rem;
+}
+
+
+/* =========================================
+   CERRAR
+========================================= */
+
+.btn-cerrar {
+    border: none;
+
+    background: #f1f1f1;
+
+    width: 38px;
+
+    height: 38px;
+
+    border-radius: 50%;
+
+    font-size: 1.6rem;
+
+    cursor: pointer;
+
+    color: #555;
+
+    transition: all 0.2s ease;
+}
+
+.btn-cerrar:hover {
+    background: #e5e5e5;
+
+    transform: rotate(90deg);
+}
+
+
+/* =========================================
+   FORMULARIO
+========================================= */
+
+#form-fotografia {
+    padding: 1.7rem;
+}
+
+.campo-formulario {
+    margin-bottom: 1.2rem;
+}
+
+.campo-formulario label {
+    display: block;
+
+    margin-bottom: 0.5rem;
+
+    font-weight: bold;
+
+    color: var(--text-color);
+}
+
+.campo-formulario input,
+.campo-formulario textarea {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    border: 1px solid #ddd;
+
+    border-radius: 10px;
+
+    padding: 0.8rem 0.9rem;
+
+    font-family: inherit;
+
+    font-size: 0.95rem;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+}
+
+.campo-formulario input:focus,
+.campo-formulario textarea:focus {
+    border-color: var(--primary-color);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(255, 87, 34, 0.12);
+}
+
+.campo-formulario textarea {
+    resize: vertical;
+}
+
+
+/* =========================================
+   DOS COLUMNAS
+========================================= */
+
+.formulario-dos-columnas {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 1rem;
+}
+
+
+/* =========================================
+   ZONA IMAGEN
+========================================= */
+
+.zona-imagen {
+    border: 2px dashed #ddd;
+
+    border-radius: 14px;
+
+    padding: 1.7rem;
+
+    text-align: center;
+
+    background: #fafafa;
+
+    transition:
+        border-color 0.2s,
+        background 0.2s;
+}
+
+.zona-imagen:hover {
+    border-color: var(--primary-color);
+
+    background: #fff8f4;
+}
+
+.icono-subida {
+    font-size: 2.5rem;
+
+    margin-bottom: 0.5rem;
+}
+
+.zona-imagen strong {
+    display: block;
+
+    color: var(--text-color);
+
+    margin-bottom: 0.4rem;
+}
+
+.zona-imagen span {
+    display: block;
+
+    color: #888;
+
+    font-size: 0.85rem;
+
+    margin-bottom: 1rem;
+}
+
+
+/* =========================================
+   INPUT FILE
+========================================= */
+
+#imagen {
+    display: none;
+}
+
+.btn-seleccionar {
+    display: inline-block;
+
+    background: #eeeeee;
+
+    color: var(--text-color);
+
+    padding: 0.65rem 1rem;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    transition: all 0.2s ease;
+}
+
+.btn-seleccionar:hover {
+    background: #e2e2e2;
+}
+
+
+/* =========================================
+   NOMBRE IMAGEN
+========================================= */
+
+.nombre-imagen {
+    margin-top: 0.8rem;
+
+    color: var(--primary-color);
+
+    font-weight: bold;
+
+    font-size: 0.9rem;
+
+    word-break: break-word;
+}
+
+
+/* =========================================
+   MENSAJES FORMULARIO
+========================================= */
+
+.mensaje-formulario {
+    display: none;
+
+    padding: 0.8rem 1rem;
+
+    margin-bottom: 1rem;
+
+    border-radius: 8px;
+
+    font-size: 0.9rem;
+}
+
+.mensaje-formulario.exito {
+    display: block;
+
+    background: #e8f7ee;
+
+    color: #217a45;
+}
+
+.mensaje-formulario.error {
+    display: block;
+
+    background: #fdecec;
+
+    color: #b42318;
+}
+
+
+/* =========================================
+   FOOTER MODAL
+========================================= */
+
+.modal-footer {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 0.8rem;
+
+    padding-top: 1rem;
+
+    border-top: 1px solid #eee;
+}
+
+.btn-cancelar,
+.btn-guardar {
+    border: none;
+
+    padding: 0.75rem 1.2rem;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    transition: all 0.2s ease;
+}
+
+.btn-cancelar {
+    background: #eeeeee;
+
+    color: #444;
+}
+
+.btn-cancelar:hover {
+    background: #e1e1e1;
+}
+
+.btn-guardar {
+    background: var(--primary-color);
+
+    color: white;
+}
+
+.btn-guardar:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-guardar:disabled {
+    opacity: 0.6;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+/* =========================================
+   VIDEOS
+========================================= */
+
+.grid-videos {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(300px, 1fr)
+        );
+
+    gap: 1.5rem;
+}
+
+.video-card {
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    box-shadow: var(--shadow);
+
+    background: white;
+
+    transition:
+        transform 0.3s,
+        box-shadow 0.3s;
+}
+
+.video-card:hover {
+    transform: translateY(-6px);
+
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.video-card iframe {
+    width: 100%;
+
+    height: 200px;
+
+    border: none;
+
+    display: block;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .panel-admin-contenido {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .btn-admin {
+        width: 100%;
+    }
+
+    .formulario-dos-columnas {
+        grid-template-columns: 1fr;
+
+        gap: 0;
+    }
+
+    .modal-fotografia {
+        padding: 0.8rem;
+    }
+
+    .modal-contenido {
+        max-height: 95vh;
+    }
+
+    .modal-header {
+        padding: 1.2rem;
+    }
+
+    #form-fotografia {
+        padding: 1.2rem;
+    }
+
+}
