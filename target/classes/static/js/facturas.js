@@ -84,9 +84,6 @@ document.addEventListener("DOMContentLoaded", function() {
                             <button onclick="abrirModalNotaCredito(${f.id})" class="btn-small" style="background: #ffc107; color: black;">
                                 Nota Crédito
                             </button>
-                            <button onclick="eliminarFactura(${f.id})" class="btn-small btn-danger">
-                                Eliminar
-                            </button>
                         </div>
                     </div>
                     <div class="factura-info">

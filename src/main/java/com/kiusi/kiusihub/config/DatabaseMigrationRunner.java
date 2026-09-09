@@ -86,6 +86,35 @@ public class DatabaseMigrationRunner {
                         "ALTER TABLE recaudos ADD COLUMN factura_id BIGINT NOT NULL DEFAULT 0");
             }
 
+            // --- PRODUCTOS ---
+            safeExec("CREATE productos IF NOT EXISTS",
+                    "CREATE TABLE IF NOT EXISTS productos (" +
+                            "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                            "nombre VARCHAR(255) NOT NULL, " +
+                            "descripcion VARCHAR(500), " +
+                            "precio DOUBLE NOT NULL DEFAULT 0, " +
+                            "stock INT NOT NULL DEFAULT 0, " +
+                            "categoria VARCHAR(128), " +
+                            "imagen_url VARCHAR(500), " +
+                            "activo TINYINT(1) DEFAULT 1, " +
+                            "referencia VARCHAR(128))");
+            if (!columnExists("productos", "referencia")) {
+                safeExec("productos ADD referencia VARCHAR(128)",
+                        "ALTER TABLE productos ADD COLUMN referencia VARCHAR(128)");
+            }
+            if (!columnExists("productos", "categoria")) {
+                safeExec("productos ADD categoria VARCHAR(128)",
+                        "ALTER TABLE productos ADD COLUMN categoria VARCHAR(128)");
+            }
+            if (!columnExists("productos", "imagen_url")) {
+                safeExec("productos ADD imagen_url VARCHAR(500)",
+                        "ALTER TABLE productos ADD COLUMN imagen_url VARCHAR(500)");
+            }
+            if (!columnExists("productos", "activo")) {
+                safeExec("productos ADD activo TINYINT(1) DEFAULT 1",
+                        "ALTER TABLE productos ADD COLUMN activo TINYINT(1) DEFAULT 1");
+            }
+
             // --- NOTAS CREDITO ---
             // 1. Crear tablas si no existen
             safeExec("CREATE notas_credito IF NOT EXISTS",

@@ -186,28 +186,44 @@ public class RecaudoRepository {
 
     public Recaudo save(Recaudo recaudo) {
         if (recaudo.getId() == null) {
-            String sql = "INSERT INTO recaudos (factura_id, monto, fecha) VALUES (?, ?, NOW())";
+            boolean ok = false;
             try {
-                jdbcTemplate.update(sql, recaudo.getFacturaId(), recaudo.getMonto());
-            } catch (Exception e) {
+                String sqlWithMetodo = "INSERT INTO recaudos (factura_id, monto, fecha, metodo_pago) VALUES (?, ?, NOW(), ?)";
+                jdbcTemplate.update(sqlWithMetodo, recaudo.getFacturaId(), recaudo.getMonto(),
+                        (recaudo.getMetodoPago() != null && !recaudo.getMetodoPago().trim().isEmpty())
+                                ? recaudo.getMetodoPago() : null);
+                ok = true;
+            } catch (Exception e1) {
                 try {
-                    String sql2 = "INSERT INTO recaudos (factura_id, monto, fecha, metodo_pago) VALUES (?, ?, NOW(), ?)";
-                    jdbcTemplate.update(sql2, recaudo.getFacturaId(), recaudo.getMonto(), recaudo.getMetodoPago());
+                    String sqlBasic = "INSERT INTO recaudos (factura_id, monto, fecha) VALUES (?, ?, NOW())";
+                    jdbcTemplate.update(sqlBasic, recaudo.getFacturaId(), recaudo.getMonto());
+                    ok = true;
                 } catch (Exception e2) {
+                    try {
+                        String sqlNoFecha = "INSERT INTO recaudos (factura_id, monto) VALUES (?, ?)";
+                        jdbcTemplate.update(sqlNoFecha, recaudo.getFacturaId(), recaudo.getMonto());
+                        ok = true;
+                    } catch (Exception ignored) {}
                 }
             }
             Long id = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
             recaudo.setId(id);
+            if (ok && recaudo.getMetodoPago() != null && !recaudo.getMetodoPago().trim().isEmpty()) {
+                try {
+                    jdbcTemplate.update("UPDATE recaudos SET metodo_pago = ? WHERE id = ?",
+                            recaudo.getMetodoPago(), id);
+                } catch (Exception ignored) {}
+            }
         } else {
-            String sql = "UPDATE recaudos SET factura_id = ?, monto = ? WHERE id = ?";
             try {
-                jdbcTemplate.update(sql, recaudo.getFacturaId(), recaudo.getMonto(), recaudo.getId());
+                String sql2 = "UPDATE recaudos SET factura_id = ?, monto = ?, metodo_pago = ? WHERE id = ?";
+                jdbcTemplate.update(sql2, recaudo.getFacturaId(), recaudo.getMonto(),
+                        recaudo.getMetodoPago(), recaudo.getId());
             } catch (Exception e) {
                 try {
-                    String sql2 = "UPDATE recaudos SET factura_id = ?, monto = ?, metodo_pago = ? WHERE id = ?";
-                    jdbcTemplate.update(sql2, recaudo.getFacturaId(), recaudo.getMonto(), recaudo.getMetodoPago(), recaudo.getId());
-                } catch (Exception e2) {
-                }
+                    String sql = "UPDATE recaudos SET factura_id = ?, monto = ? WHERE id = ?";
+                    jdbcTemplate.update(sql, recaudo.getFacturaId(), recaudo.getMonto(), recaudo.getId());
+                } catch (Exception ignored) {}
             }
         }
         return recaudo;
@@ -219,50 +235,81 @@ public class RecaudoRepository {
     }
 
     private static class RecaudoRowMapper implements RowMapper<Recaudo> {
+        private static boolean hasCol(ResultSet rs, String name) throws SQLException {
+            java.sql.ResultSetMetaData md = rs.getMetaData();
+            int cols = md.getColumnCount();
+            for (int i = 1; i <= cols; i++) {
+                String label = md.getColumnLabel(i);
+                if (label != null && label.equalsIgnoreCase(name)) return true;
+            }
+            return false;
+        }
         @Override
         public Recaudo mapRow(ResultSet rs, int rowNum) throws SQLException {
             Recaudo recaudo = new Recaudo();
             recaudo.setId(rs.getLong("id"));
-            recaudo.setFacturaId(rs.getLong("factura_id"));
-            recaudo.setMonto(rs.getDouble("monto"));
-            try {
-                recaudo.setFecha(rs.getDate("fecha"));
-            } catch (SQLException e) {
+            if (hasCol(rs, "factura_id")) recaudo.setFacturaId(rs.getLong("factura_id"));
+            if (hasCol(rs, "monto")) recaudo.setMonto(rs.getDouble("monto"));
+            if (hasCol(rs, "fecha")) {
+                try {
+                    java.sql.Date fd = rs.getDate("fecha");
+                    if (fd != null) recaudo.setFecha(fd);
+                } catch (SQLException ignored) {}
             }
-            try {
-                recaudo.setMetodoPago(rs.getString("metodo_pago"));
-            } catch (SQLException e) {
+            if (hasCol(rs, "metodo_pago")) {
+                try {
+                    String m = rs.getString("metodo_pago");
+                    if (m != null && !m.trim().isEmpty()) recaudo.setMetodoPago(m.trim());
+                } catch (SQLException ignored) {}
             }
             return recaudo;
         }
     }
 
     private static class RecaudoDetalleRowMapper implements RowMapper<RecaudoDetalle> {
+        private static boolean hasCol(ResultSet rs, String name) throws SQLException {
+            java.sql.ResultSetMetaData md = rs.getMetaData();
+            int cols = md.getColumnCount();
+            for (int i = 1; i <= cols; i++) {
+                String label = md.getColumnLabel(i);
+                if (label != null && label.equalsIgnoreCase(name)) return true;
+            }
+            return false;
+        }
         @Override
         public RecaudoDetalle mapRow(ResultSet rs, int rowNum) throws SQLException {
             RecaudoDetalle d = new RecaudoDetalle();
-            d.setId(rs.getLong("id"));
-            d.setFacturaId(rs.getLong("factura_id"));
-            d.setMonto(rs.getDouble("monto"));
-            try {
-                d.setFecha(rs.getDate("fecha"));
-            } catch (SQLException e) {
+            if (hasCol(rs, "id")) d.setId(rs.getLong("id"));
+            if (hasCol(rs, "factura_id")) d.setFacturaId(rs.getLong("factura_id"));
+            if (hasCol(rs, "monto")) d.setMonto(rs.getDouble("monto"));
+            if (hasCol(rs, "fecha")) {
+                try {
+                    java.sql.Date fd = rs.getDate("fecha");
+                    if (fd != null) d.setFecha(fd);
+                } catch (SQLException ignored) {}
             }
-            try {
-                d.setMetodoPago(rs.getString("metodo_pago"));
-            } catch (SQLException e) {
+            if (hasCol(rs, "metodo_pago")) {
+                try {
+                    String m = rs.getString("metodo_pago");
+                    if (m != null && !m.trim().isEmpty()) d.setMetodoPago(m.trim());
+                } catch (SQLException ignored) {}
             }
-            try {
-                d.setCliente(rs.getString("factura_cliente"));
-            } catch (SQLException e) {
+            if (hasCol(rs, "factura_cliente")) {
+                try {
+                    String c = rs.getString("factura_cliente");
+                    if (c != null) d.setCliente(c);
+                } catch (SQLException ignored) {}
             }
-            try {
-                d.setFacturaEstado(rs.getString("factura_estado"));
-            } catch (SQLException e) {
+            if (hasCol(rs, "factura_estado")) {
+                try {
+                    String e = rs.getString("factura_estado");
+                    if (e != null) d.setFacturaEstado(e);
+                } catch (SQLException ignored) {}
             }
-            try {
-                d.setFacturaTotal(rs.getDouble("factura_total"));
-            } catch (SQLException e) {
+            if (hasCol(rs, "factura_total")) {
+                try {
+                    d.setFacturaTotal(rs.getDouble("factura_total"));
+                } catch (SQLException ignored) {}
             }
             return d;
         }
