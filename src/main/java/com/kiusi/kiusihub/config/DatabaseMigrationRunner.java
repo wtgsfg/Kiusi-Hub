@@ -65,6 +65,48 @@ public class DatabaseMigrationRunner {
     public void migrate() {
         System.out.println("\n===== KiusiHub DB Migration (notas_credito, recaudos) =====");
         try {
+            // --- FACTURAS ---
+            safeExec("CREATE facturas IF NOT EXISTS",
+                    "CREATE TABLE IF NOT EXISTS facturas (" +
+                            "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                            "pedido_id BIGINT, " +
+                            "cliente VARCHAR(255), " +
+                            "nombre_cliente VARCHAR(255), " +
+                            "vendedor VARCHAR(128), " +
+                            "total DOUBLE NOT NULL DEFAULT 0, " +
+                            "pagado DOUBLE NOT NULL DEFAULT 0, " +
+                            "saldo DOUBLE, " +
+                            "estado VARCHAR(32), " +
+                            "fecha DATETIME)");
+            if (!columnExists("facturas", "vendedor")) {
+                safeExec("facturas ADD vendedor VARCHAR(128)",
+                        "ALTER TABLE facturas ADD COLUMN vendedor VARCHAR(128)");
+            }
+            if (!columnExists("facturas", "nombre_cliente")) {
+                safeExec("facturas ADD nombre_cliente VARCHAR(255)",
+                        "ALTER TABLE facturas ADD COLUMN nombre_cliente VARCHAR(255)");
+            }
+            if (!columnExists("facturas", "cliente")) {
+                safeExec("facturas ADD cliente VARCHAR(255)",
+                        "ALTER TABLE facturas ADD COLUMN cliente VARCHAR(255)");
+            }
+            if (!columnExists("facturas", "saldo")) {
+                safeExec("facturas ADD saldo DOUBLE",
+                        "ALTER TABLE facturas ADD COLUMN saldo DOUBLE");
+            }
+            if (!columnExists("facturas", "estado")) {
+                safeExec("facturas ADD estado VARCHAR(32)",
+                        "ALTER TABLE facturas ADD COLUMN estado VARCHAR(32)");
+            }
+            if (!columnExists("facturas", "fecha")) {
+                safeExec("facturas ADD fecha DATETIME",
+                        "ALTER TABLE facturas ADD COLUMN fecha DATETIME");
+            }
+            if (!columnExists("facturas", "pedido_id")) {
+                safeExec("facturas ADD pedido_id BIGINT",
+                        "ALTER TABLE facturas ADD COLUMN pedido_id BIGINT");
+            }
+
             // --- RECAUDOS ---
             safeExec("CREATE recaudos IF NOT EXISTS",
                     "CREATE TABLE IF NOT EXISTS recaudos (" +

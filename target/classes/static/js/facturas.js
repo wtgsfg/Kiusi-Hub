@@ -1,87 +1,123 @@
-document.addEventListener("DOMContentLoaded", function() {
-    const usuario = JSON.parse(localStorage.getItem("usuario"));
+(function () {
+    'use strict';
 
-    if (!usuario) {
-        window.location.href = "login.html";
-        return;
-    }
-
-    if (usuario.rol !== "ADMIN" && usuario.rol !== "CARTERA") {
-        Swal.fire({
-            icon: 'error',
-            title: 'Acceso denegado',
-            text: 'No tienes acceso a facturación'
-        }).then(() => {
-            window.location.href = "home.html";
-        });
-        return;
-    }
-
-    let facturaActual = null;
     let itemsFactura = [];
     let productosDisponibles = [];
-    let facturaIdNotaCredito = null;
     let itemsFacturaNotaCredito = [];
+    let facturaIdNotaCredito = null;
+    let facturaActual = null;
+    let filtrosAplicados = {};
 
-    const selectProducto = document.getElementById("nuevoProducto");
-    if (selectProducto) {
-        selectProducto.addEventListener("change", function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const precio = selectedOption.dataset.precio;
-            if (precio) {
-                document.getElementById("nuevoPrecio").value = precio;
+    const fmtCOP = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
+    const fmtCOP2 = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 2 });
+
+    function getFiltrosActuales() {
+        const out = {};
+        const fields = [
+            { id: "filtroNro", key: "nroFactura", type: "number" },
+            { id: "filtroFechaDesde", key: "fechaDesde", type: "string" },
+            { id: "filtroFechaHasta", key: "fechaHasta", type: "string" },
+            { id: "filtroCliente", key: "cliente", type: "string" },
+            { id: "filtroVendedor", key: "vendedor", type: "string" },
+            { id: "filtroEstado", key: "estado", type: "string" },
+            { id: "filtroMinTotal", key: "minTotal", type: "number" },
+            { id: "filtroMaxTotal", key: "maxTotal", type: "number" }
+        ];
+        fields.forEach(f => {
+            const el = document.getElementById(f.id);
+            if (!el) return;
+            const val = el.value;
+            if (val === "" || val == null) return;
+            if (f.type === "number") {
+                const n = parseFloat(val);
+                if (!isNaN(n)) out[f.key] = n;
+            } else {
+                out[f.key] = val;
             }
         });
+        return out;
     }
 
-    function cargarFacturas() {
-        console.log("Cargando facturas...");
-        fetch("/api/facturas")
-        .then(res => {
-            console.log("Respuesta recibida:", res);
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
-            return res.json();
-        })
-        .then(data => {
-            console.log("Datos de facturas:", data);
-            const lista = document.getElementById("lista");
-            if (!lista) {
-                console.error("No se encontró el elemento #lista");
-                return;
-            }
-            lista.innerHTML = "";
+    function qs(params) {
+        const p = new URLSearchParams();
+        Object.keys(params || {}).forEach(k => {
+            const v = params[k];
+            if (v === "" || v == null) return;
+            p.append(k, typeof v === "number" ? String(v) : String(v));
+        });
+        const s = p.toString();
+        return s ? "?" + s : "";
+    }
 
+    function actualizarKPIs(resumen) {
+        const kpiTF = document.getElementById("kpiTotalFacturado");
+        const kpiTP = document.getElementById("kpiTotalPagado");
+        const kpiPE = document.getElementById("kpiTotalPendiente");
+        const kpiCant = document.getElementById("kpiCantidad");
+        if (kpiTF) kpiTF.textContent = fmtCOP.format(Number((resumen && resumen.totalFacturado) || 0));
+        if (kpiTP) kpiTP.textContent = fmtCOP.format(Number((resumen && resumen.totalPagado) || 0));
+        if (kpiPE) kpiPE.textContent = fmtCOP.format(Number((resumen && resumen.totalPendiente) || 0));
+        if (kpiCant) kpiCant.textContent = String((resumen && resumen.cantidad) || 0);
+    }
+
+    function cargarFacturas(params) {
+        console.log("Cargando facturas...", params);
+        const lista = document.getElementById("lista");
+        if (!lista) return;
+        lista.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px; background: rgba(255,255,255,0.7); border-radius: 24px; border: 1px dashed #cbd5e1;">
+                <p style="color: #64748b;">Cargando facturas...</p>
+            </div>
+        `;
+        Promise.all([
+            fetch("/api/facturas" + qs(params)).then(r => {
+                if (!r.ok) throw new Error("Error " + r.status + " al cargar facturas");
+                return r.json();
+            }),
+            fetch("/api/facturas/resumen" + qs(params)).then(r => {
+                if (!r.ok) return {};
+                return r.json();
+            })
+        ])
+        .then(([data, resumen]) => {
+            console.log("Datos de facturas:", data, "Resumen:", resumen);
+            actualizarKPIs(resumen || {});
+            lista.innerHTML = "";
             if (!data || data.length === 0) {
                 lista.innerHTML = `
-                    <div style="text-align: center; padding: 50px; background: white; border-radius: 8px;">
-                        <p style="font-size: 18px; color: #6c757d;">No hay facturas registradas</p>
+                    <div class="estado-vacio">
+                        <span class="emoji">📭</span>
+                        <h3>No hay facturas</h3>
+                        <p>Prueba con otros filtros o registra pedidos para verlas aquí.</p>
                     </div>
                 `;
                 return;
             }
-
             data.forEach(f => {
-                const isPagada = f.estado === 'PAGADO' || f.saldo <= 0;
-                const estadoClase = isPagada ? "despachado" : "pendiente";
-                const estadoTexto = isPagada ? "Pagado ✅" : "Pendiente ❌";
+                const saldoCalc = (Number(f.total || 0) - Number(f.pagado || 0));
+                const saldo = (f.saldo != null && !isNaN(Number(f.saldo))) ? Number(f.saldo) : saldoCalc;
+                const est = (f.estado && String(f.estado).toUpperCase() === "PAGADO") || saldo <= 0;
+                const estadoClase = est ? "pagado" : "pendiente";
+                const estadoTexto = est ? "Pagado ✅" : "Pendiente ❌";
+                const cliente = f.cliente || f.nombreCliente || "—";
+                const vendedor = f.vendedor || "—";
+                const fechaTxt = f.fecha ? new Date(f.fecha).toLocaleDateString() : "—";
 
                 const div = document.createElement("div");
                 div.className = "factura-row";
                 div.innerHTML = `
                     <div class="factura-header">
                         <div>
-                            <h3>Factura #${f.id}</h3>
-                            <p style="margin: 5px 0; color: #6c757d; font-size: 14px;">
-                                Pedido ID: #${f.pedidoId} | Fecha: ${new Date(f.fecha).toLocaleDateString()}
+                            <h3 style="margin:0 0 6px 0; font-size: 20px; color:#0f172a;">Factura #${f.id}</h3>
+                            <p style="margin: 0; color: #64748b; font-size: 14px;">
+                                Pedido ID: #${f.pedidoId || "—"} | Fecha: ${fechaTxt}
                             </p>
                         </div>
                         <div class="factura-actions">
-                            <button onclick="descargarFacturaPdf(${f.id})" class="btn-small" style="background: #17a2b8; color: white;">
+                            <button onclick="window.descargarFacturaPdf(${f.id})" class="btn-small btn-pdf">
                                 📄 PDF
                             </button>
-                            <button onclick="abrirModalNotaCredito(${f.id})" class="btn-small" style="background: #ffc107; color: black;">
+                            <button onclick="window.abrirModalNotaCredito(${f.id})" class="btn-small btn-nota">
                                 Nota Crédito
                             </button>
                         </div>
@@ -89,23 +125,27 @@ document.addEventListener("DOMContentLoaded", function() {
                     <div class="factura-info">
                         <div class="info-item">
                             <span class="info-label">CLIENTE</span>
-                            <span class="info-value">${f.cliente}</span>
+                            <span class="info-value">${cliente}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">VENDEDOR</span>
+                            <span class="info-value">${vendedor}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">TOTAL</span>
-                            <span class="info-value" style="color: var(--primary-color); font-weight: bold;">$${f.total}</span>
+                            <span class="info-value" style="color: #15803d; font-weight: 800;">${fmtCOP2.format(Number(f.total || 0))}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">PAGADO</span>
-                            <span class="info-value">$${f.pagado}</span>
+                            <span class="info-value">${fmtCOP2.format(Number(f.pagado || 0))}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">SALDO</span>
-                            <span class="info-value" style="color: ${f.saldo > 0 ? '#dc3545' : '#28a745'}; font-weight: bold;">$${f.saldo}</span>
+                            <span class="info-value" style="color: ${saldo > 0 ? '#dc2626' : '#16a34a'}; font-weight: 800;">${fmtCOP2.format(saldo)}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">ESTADO</span>
-                            <span class="badge ${estadoClase}">${estadoTexto}</span>
+                            <span class="badge-estado ${estadoClase}">${estadoTexto}</span>
                         </div>
                     </div>
                 `;
@@ -120,6 +160,49 @@ document.addEventListener("DOMContentLoaded", function() {
                 text: 'Error al cargar las facturas: ' + err.message
             });
         });
+    }
+
+    function cargarSelects() {
+        const selCliente = document.getElementById("filtroCliente");
+        const selVendedor = document.getElementById("filtroVendedor");
+        fetch("/api/facturas/clientes-lista")
+            .then(r => r.ok ? r.json() : [])
+            .then(list => {
+                if (!selCliente) return;
+                const actual = selCliente.value;
+                selCliente.innerHTML = '<option value="">Todos los clientes</option>';
+                (list || []).forEach(c => {
+                    selCliente.innerHTML += `<option value="${c}">${c}</option>`;
+                });
+                selCliente.value = actual || "";
+            })
+            .catch(() => {});
+        fetch("/api/facturas/vendedores-lista")
+            .then(r => r.ok ? r.json() : [])
+            .then(list => {
+                if (!selVendedor) return;
+                const actual = selVendedor.value;
+                selVendedor.innerHTML = '<option value="">Todos los vendedores</option>';
+                (list || []).forEach(v => {
+                    selVendedor.innerHTML += `<option value="${v}">${v}</option>`;
+                });
+                selVendedor.value = actual || "";
+            })
+            .catch(() => {});
+    }
+
+    function aplicarFiltros() {
+        filtrosAplicados = getFiltrosActuales();
+        cargarFacturas(filtrosAplicados);
+    }
+
+    function resetearFiltros() {
+        ["filtroNro", "filtroFechaDesde", "filtroFechaHasta", "filtroCliente", "filtroVendedor", "filtroEstado", "filtroMinTotal", "filtroMaxTotal"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = "";
+        });
+        filtrosAplicados = {};
+        cargarFacturas({});
     }
 
     function cargarProductos() {
@@ -149,9 +232,12 @@ document.addEventListener("DOMContentLoaded", function() {
             facturaActual = factura;
             productosDisponibles = productos;
 
-            document.getElementById("modalFacturaId").textContent = factura.id;
-            document.getElementById("editCliente").value = factura.cliente;
-            document.getElementById("editPagado").value = factura.pagado;
+            const modalFacturaId = document.getElementById("modalFacturaId");
+            if (modalFacturaId) modalFacturaId.textContent = factura.id;
+            const editCliente = document.getElementById("editCliente");
+            if (editCliente) editCliente.value = factura.cliente || "";
+            const editPagado = document.getElementById("editPagado");
+            if (editPagado) editPagado.value = factura.pagado || 0;
 
             const select = document.getElementById("nuevoProducto");
             if (select) {
@@ -169,7 +255,8 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(items => {
             itemsFactura = items;
             renderizarItems();
-            document.getElementById("modalEditar").classList.add("active");
+            const modal = document.getElementById("modalEditar");
+            if (modal) modal.classList.add("active");
         })
         .catch(err => {
             console.error("Error:", err);
@@ -191,18 +278,18 @@ document.addEventListener("DOMContentLoaded", function() {
                     <input type="text" value="${item.nombreProducto}" readonly style="background: #f8f9fa; border: none;">
                 </td>
                 <td>
-                    <input type="number" value="${item.cantidad}" class="cantidad-input" min="1" onchange="calcularTotal()">
+                    <input type="number" value="${item.cantidad}" class="cantidad-input" min="1" onchange="window.calcularTotal()">
                 </td>
                 <td>
-                    <input type="number" value="${item.precio}" class="precio-input" min="0" step="0.01" onchange="calcularTotal()">
+                    <input type="number" value="${item.precio}" class="precio-input" min="0" step="0.01" onchange="window.calcularTotal()">
                 </td>
                 <td class="item-total">$${(item.precio * item.cantidad).toFixed(2)}</td>
                 <td>
-                    <button onclick="eliminarItem(${item.id})" class="btn-danger">X</button>
+                    <button onclick="window.eliminarItem(${item.id})" class="btn-danger">X</button>
                 </td>
             </tr>
         `).join("");
-        calcularTotal();
+        window.calcularTotal();
     }
 
     function calcularTotal() {
@@ -210,8 +297,8 @@ document.addEventListener("DOMContentLoaded", function() {
         const rows = document.querySelectorAll("#itemsTableBody tr");
         
         rows.forEach(row => {
-            const cantidad = parseFloat(row.querySelector(".cantidad-input").value || 0);
-            const precio = parseFloat(row.querySelector(".precio-input").value || 0);
+            const cantidad = parseFloat(row.querySelector(".cantidad-input").value || "0");
+            const precio = parseFloat(row.querySelector(".precio-input").value || "0");
             const subtotal = cantidad * precio;
             row.querySelector(".item-total").textContent = "$" + subtotal.toFixed(2);
             total += subtotal;
@@ -224,9 +311,12 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function agregarItem() {
-        const productoId = document.getElementById("nuevoProducto").value;
-        const cantidad = parseInt(document.getElementById("nuevaCantidad").value);
-        const precio = parseFloat(document.getElementById("nuevoPrecio").value);
+        const productoIdEl = document.getElementById("nuevoProducto");
+        const cantidadEl = document.getElementById("nuevaCantidad");
+        const precioEl = document.getElementById("nuevoPrecio");
+        const productoId = productoIdEl ? productoIdEl.value : "";
+        const cantidad = parseInt(cantidadEl ? cantidadEl.value : "0", 10);
+        const precio = parseFloat(precioEl ? precioEl.value : "0");
 
         if (!productoId || !cantidad || !precio) {
             Swal.fire({
@@ -237,7 +327,7 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        const producto = productosDisponibles.find(p => p.id == productoId);
+        const producto = productosDisponibles.find(p => String(p.id) === String(productoId));
         if (!producto) {
             Swal.fire({
                 icon: 'error',
@@ -273,9 +363,9 @@ document.addEventListener("DOMContentLoaded", function() {
             itemsFactura.push(nuevoItem);
             renderizarItems();
             
-            document.getElementById("nuevoProducto").value = "";
-            document.getElementById("nuevaCantidad").value = "";
-            document.getElementById("nuevoPrecio").value = "";
+            if (productoIdEl) productoIdEl.value = "";
+            if (cantidadEl) cantidadEl.value = "";
+            if (precioEl) precioEl.value = "";
             
             Swal.fire({
                 icon: 'success',
@@ -297,7 +387,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function cerrarModal() {
-        document.getElementById("modalEditar").classList.remove("active");
+        const modal = document.getElementById("modalEditar");
+        if (modal) modal.classList.remove("active");
         facturaActual = null;
         itemsFactura = [];
     }
@@ -306,12 +397,14 @@ document.addEventListener("DOMContentLoaded", function() {
         if (!facturaActual) return;
 
         const totalFacturaEl = document.getElementById("totalFactura");
-        const total = totalFacturaEl ? parseFloat(totalFacturaEl.textContent.replace("$", "")) : 0;
-        const pagado = parseFloat(document.getElementById("editPagado").value);
+        const total = totalFacturaEl ? parseFloat(totalFacturaEl.textContent.replace(/[$,]/g, "")) : 0;
+        const pagadoEl = document.getElementById("editPagado");
+        const pagado = parseFloat((pagadoEl && pagadoEl.value) || "0");
         const saldo = total - pagado;
+        const editClienteEl = document.getElementById("editCliente");
 
         const factura = {
-            cliente: document.getElementById("editCliente").value,
+            cliente: editClienteEl ? editClienteEl.value : "",
             total: total,
             pagado: pagado,
             saldo: saldo,
@@ -328,78 +421,77 @@ document.addEventListener("DOMContentLoaded", function() {
             confirmButtonText: 'Sí, guardar',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
-            if (result.isConfirmed) {
-                console.log("Guardando factura:", factura);
-                fetch(`/api/facturas/${facturaActual.id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(factura)
-                })
-                .then(res => {
-                    console.log("Respuesta de factura:", res);
-                    if (!res.ok) {
-                        throw new Error(`HTTP error! status: ${res.status}`);
-                    }
-                    const rows = document.querySelectorAll("#itemsTableBody tr");
-                    let promises = [];
+            if (!result.isConfirmed) return;
+            console.log("Guardando factura:", factura);
+            fetch(`/api/facturas/${facturaActual.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(factura)
+            })
+            .then(res => {
+                console.log("Respuesta de factura:", res);
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                const rows = document.querySelectorAll("#itemsTableBody tr");
+                const promises = [];
+                
+                rows.forEach(row => {
+                    const itemId = parseInt(row.dataset.itemId, 10);
+                    const cantidad = parseInt(row.querySelector(".cantidad-input").value, 10);
+                    const precio = parseFloat(row.querySelector(".precio-input").value || "0");
+                    const originalPrecio = parseFloat(row.dataset.originalPrecio || "0");
                     
-                    rows.forEach(row => {
-                        const itemId = parseInt(row.dataset.itemId);
-                        const cantidad = parseInt(row.querySelector(".cantidad-input").value);
-                        const precio = parseFloat(row.querySelector(".precio-input").value);
-                        const originalPrecio = parseFloat(row.dataset.originalPrecio);
-                        
-                        const item = itemsFactura.find(i => i.id === itemId);
-                        
-                        if (item) {
-                            console.log("Actualizando item:", { itemId, cantidad, precio, originalPrecio });
-                            if (precio !== originalPrecio) {
-                                promises.push(
-                                    fetch(`/api/items/${itemId}/price?cantidad=${cantidad}&precio=${precio}`, {
-                                        method: "PUT"
-                                    }).then(r => {
-                                        if (!r.ok) throw new Error(`Error updating item ${itemId}`);
-                                        return r;
-                                    })
-                                );
-                            } else {
-                                promises.push(
-                                    fetch(`/api/items/${itemId}?cantidad=${cantidad}`, {
-                                        method: "PUT"
-                                    }).then(r => {
-                                        if (!r.ok) throw new Error(`Error updating item ${itemId}`);
-                                        return r;
-                                    })
-                                );
-                            }
+                    const item = itemsFactura.find(i => i.id === itemId);
+                    
+                    if (item) {
+                        console.log("Actualizando item:", { itemId, cantidad, precio, originalPrecio });
+                        if (precio !== originalPrecio) {
+                            promises.push(
+                                fetch(`/api/items/${itemId}/price?cantidad=${cantidad}&precio=${precio}`, {
+                                    method: "PUT"
+                                }).then(r => {
+                                    if (!r.ok) throw new Error(`Error updating item ${itemId}`);
+                                    return r;
+                                })
+                            );
+                        } else {
+                            promises.push(
+                                fetch(`/api/items/${itemId}?cantidad=${cantidad}`, {
+                                    method: "PUT"
+                                }).then(r => {
+                                    if (!r.ok) throw new Error(`Error updating item ${itemId}`);
+                                    return r;
+                                })
+                            );
                         }
-                    });
-
-                    Promise.all(promises).then(() => {
-                        console.log("Todos los items actualizados");
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Guardado',
-                            text: 'Factura actualizada correctamente',
-                            timer: 1500
-                        }).then(() => {
-                            cerrarModal();
-                            cargarFacturas();
-                        });
-                    }).catch(err => {
-                        console.error("Error al actualizar items:", err);
-                        throw err;
-                    });
-                })
-                .catch(err => {
-                    console.error("Error al guardar factura:", err);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error al guardar los cambios: ' + err.message
-                    });
+                    }
                 });
-            }
+
+                Promise.all(promises).then(() => {
+                    console.log("Todos los items actualizados");
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Guardado',
+                        text: 'Factura actualizada correctamente',
+                        timer: 1500
+                    }).then(() => {
+                        cerrarModal();
+                        cargarFacturas(filtrosAplicados);
+                    });
+                }).catch(err => {
+                    console.error("Error al actualizar items:", err);
+                    throw err;
+                });
+            })
+            .catch(err => {
+                console.error("Error al guardar factura:", err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al guardar los cambios: ' + err.message
+                });
+            });
         });
     }
 
@@ -414,35 +506,34 @@ document.addEventListener("DOMContentLoaded", function() {
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
-            if (result.isConfirmed) {
-                console.log("Eliminando item:", id);
-                fetch(`/api/items/${id}`, {
-                    method: "DELETE"
-                })
-                .then(res => {
-                    console.log("Respuesta de eliminación:", res);
-                    if (!res.ok) {
-                        throw new Error(`HTTP error! status: ${res.status}`);
-                    }
-                    itemsFactura = itemsFactura.filter(i => i.id !== id);
-                    renderizarItems();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Eliminado',
-                        text: 'Item eliminado correctamente',
-                        timer: 1500
-                    });
-                    cargarProductos();
-                })
-                .catch(err => {
-                    console.error("Error al eliminar item:", err);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error al eliminar el item: ' + err.message
-                    });
+            if (!result.isConfirmed) return;
+            console.log("Eliminando item:", id);
+            fetch(`/api/items/${id}`, {
+                method: "DELETE"
+            })
+            .then(res => {
+                console.log("Respuesta de eliminación:", res);
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                itemsFactura = itemsFactura.filter(i => i.id !== id);
+                renderizarItems();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Eliminado',
+                    text: 'Item eliminado correctamente',
+                    timer: 1500
                 });
-            }
+                cargarProductos();
+            })
+            .catch(err => {
+                console.error("Error al eliminar item:", err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al eliminar el item: ' + err.message
+                });
+            });
         });
     }
 
@@ -457,41 +548,42 @@ document.addEventListener("DOMContentLoaded", function() {
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
-            if (result.isConfirmed) {
-                console.log("Eliminando factura:", id);
-                fetch(`/api/facturas/${id}`, {
-                    method: "DELETE"
-                })
-                .then(res => {
-                    console.log("Respuesta de eliminación de factura:", res);
-                    if (!res.ok) {
-                        throw new Error(`HTTP error! status: ${res.status}`);
-                    }
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Eliminado',
-                        text: 'Factura eliminada correctamente',
-                        timer: 1500
-                    }).then(() => {
-                        cargarFacturas();
-                    });
-                })
-                .catch(err => {
-                    console.error("Error al eliminar factura:", err);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error al eliminar la factura: ' + err.message
-                    });
+            if (!result.isConfirmed) return;
+            console.log("Eliminando factura:", id);
+            fetch(`/api/facturas/${id}`, {
+                method: "DELETE"
+            })
+            .then(res => {
+                console.log("Respuesta de eliminación de factura:", res);
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Eliminado',
+                    text: 'Factura eliminada correctamente',
+                    timer: 1500
+                }).then(() => {
+                    cargarFacturas(filtrosAplicados);
                 });
-            }
+            })
+            .catch(err => {
+                console.error("Error al eliminar factura:", err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al eliminar la factura: ' + err.message
+                });
+            });
         });
     }
 
     function pagar() {
-        const facturaId = document.getElementById("facturaId").value;
-        const monto = document.getElementById("monto").value;
+        const facturaIdEl = document.getElementById("facturaId");
+        const montoEl = document.getElementById("monto");
         const metodoPagoEl = document.getElementById("metodoPago");
+        const facturaId = facturaIdEl ? facturaIdEl.value : "";
+        const monto = montoEl ? montoEl.value : "";
         const metodoPago = metodoPagoEl ? metodoPagoEl.value : "";
 
         if (!facturaId || !monto) {
@@ -503,7 +595,7 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        let url = `/api/recaudos?facturaId=${facturaId}&monto=${monto}`;
+        let url = `/api/recaudos?facturaId=${encodeURIComponent(facturaId)}&monto=${encodeURIComponent(monto)}`;
         if (metodoPago && metodoPago.trim()) {
             url += `&metodoPago=${encodeURIComponent(metodoPago.trim())}`;
         }
@@ -519,10 +611,10 @@ document.addEventListener("DOMContentLoaded", function() {
                     text: 'Pago registrado correctamente',
                     timer: 1500
                 }).then(() => {
-                    document.getElementById("facturaId").value = "";
-                    document.getElementById("monto").value = "";
+                    if (facturaIdEl) facturaIdEl.value = "";
+                    if (montoEl) montoEl.value = "";
                     if (metodoPagoEl) metodoPagoEl.value = "";
-                    cargarFacturas();
+                    cargarFacturas(filtrosAplicados);
                 });
             } else {
                 return res.text().then(t => {
@@ -583,7 +675,8 @@ document.addEventListener("DOMContentLoaded", function() {
     function abrirModalNotaCredito(id) {
         console.log('Opening nota de facturaId: ' + id);
         facturaIdNotaCredito = id;
-        document.getElementById("modalFacturaId").textContent = id;
+        const modalFacturaId = document.getElementById("modalFacturaId");
+        if (modalFacturaId) modalFacturaId.textContent = id;
 
         let pedidoIdTemp = null;
 
@@ -628,7 +721,8 @@ document.addEventListener("DOMContentLoaded", function() {
                         cantidadDisponible: (it.cantidad || 0) - (cantidadesDevueltas[it.id] || 0)
                     }));
                     renderizarItemsNotaCredito();
-                    document.getElementById("modalNotaCredito").classList.add("active");
+                    const modal = document.getElementById("modalNotaCredito");
+                    if (modal) modal.classList.add("active");
                 });
         })
         .catch(err => {
@@ -642,20 +736,25 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function cerrarModalNotaCredito() {
-        document.getElementById("modalNotaCredito").classList.remove("active");
+        const modal = document.getElementById("modalNotaCredito");
+        if (modal) modal.classList.remove("active");
         facturaIdNotaCredito = null;
         itemsFacturaNotaCredito = [];
-        document.getElementById("motivoNotaCredito").value = "";
-        document.getElementById("itemsNotaCreditoTableBody").innerHTML = "";
-        document.getElementById("totalNotaCredito").textContent = "$0.00";
+        const motivo = document.getElementById("motivoNotaCredito");
+        if (motivo) motivo.value = "";
+        const tbody = document.getElementById("itemsNotaCreditoTableBody");
+        if (tbody) tbody.innerHTML = "";
+        const total = document.getElementById("totalNotaCredito");
+        if (total) total.textContent = "$0.00";
     }
 
     function renderizarItemsNotaCredito() {
         const tbody = document.getElementById("itemsNotaCreditoTableBody");
+        if (!tbody) return;
         tbody.innerHTML = "";
 
         itemsFacturaNotaCredito.forEach((item, index) => {
-            const precio = item.precioUnitario || item.precio;
+            const precio = item.precioUnitario != null ? item.precioUnitario : item.precio;
             const cantFacturada = item.cantidad || 0;
             const cantDevuelta = item.cantidadDevuelta || 0;
             const cantDisponible = item.cantidadDisponible != null ? item.cantidadDisponible : (cantFacturada - cantDevuelta);
@@ -666,7 +765,7 @@ document.addEventListener("DOMContentLoaded", function() {
             tr.style = bgRow;
             tr.innerHTML = `
                 <td style="text-align:center;">
-                    <input type="checkbox" id="item-${index}" onchange="onCambiarCheckboxItem(${index})" ${sinDisponibilidad ? "disabled" : ""}>
+                    <input type="checkbox" id="item-${index}" onchange="window.onCambiarCheckboxItem(${index})" ${sinDisponibilidad ? "disabled" : ""}>
                 </td>
                 <td>
                     <input type="text" value="${item.nombreProducto}" readonly style="background: #f8f9fa; border: none; width: 100%; ${sinDisponibilidad ? "color:#999;" : ""}">
@@ -682,7 +781,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 </td>
                 <td>
                     <input type="number" value="0" min="0" max="${cantDisponible}" id="cantidad-devolver-${index}"
-                        onchange="onCambiarCantidadItem(${index})" oninput="onCambiarCantidadItem(${index})"
+                        onchange="window.onCambiarCantidadItem(${index})" oninput="window.onCambiarCantidadItem(${index})"
                         style="width: 100%; text-align:center;"
                         ${sinDisponibilidad ? "disabled" : ""}>
                 </td>
@@ -695,7 +794,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    window.onCambiarCheckboxItem = function (index) {
+    function onCambiarCheckboxItem(index) {
         const checkbox = document.getElementById(`item-${index}`);
         const inputCantidad = document.getElementById(`cantidad-devolver-${index}`);
         if (!checkbox || !inputCantidad) return;
@@ -705,7 +804,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const maxDisp = item.cantidadDisponible != null ? item.cantidadDisponible : (item.cantidad - (item.cantidadDevuelta || 0));
         if (checkbox.checked) {
-            const actual = parseInt(inputCantidad.value) || 0;
+            const actual = parseInt(inputCantidad.value || "0", 10);
             if (actual <= 0) {
                 const poner = maxDisp >= 1 ? 1 : maxDisp;
                 inputCantidad.value = poner;
@@ -714,9 +813,9 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
         calcularTotalNotaCredito();
-    };
+    }
 
-    window.onCambiarCantidadItem = function (index) {
+    function onCambiarCantidadItem(index) {
         const checkbox = document.getElementById(`item-${index}`);
         const inputCantidad = document.getElementById(`cantidad-devolver-${index}`);
         if (!checkbox || !inputCantidad) return;
@@ -725,7 +824,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (!item) return;
 
         const maxDisp = item.cantidadDisponible != null ? item.cantidadDisponible : (item.cantidad - (item.cantidadDevuelta || 0));
-        let cantRaw = parseInt(inputCantidad.value) || 0;
+        let cantRaw = parseInt(inputCantidad.value || "0", 10);
         if (cantRaw < 0) cantRaw = 0;
         if (cantRaw > maxDisp) {
             cantRaw = maxDisp;
@@ -735,7 +834,7 @@ document.addEventListener("DOMContentLoaded", function() {
             checkbox.checked = true;
         }
         calcularTotalNotaCredito();
-    };
+    }
 
     function calcularTotalNotaCredito() {
         let total = 0;
@@ -745,12 +844,12 @@ document.addEventListener("DOMContentLoaded", function() {
             const inputCantidad = document.getElementById(`cantidad-devolver-${index}`);
             const precioEl = document.getElementById(`precio-${index}`);
             if (!precioEl) return;
-            const precio = parseFloat(precioEl.value) || 0;
+            const precio = parseFloat(precioEl.value || "0");
 
             let cantidadDevolver = 0;
             if (inputCantidad && !inputCantidad.disabled) {
                 const maxDisp = item.cantidadDisponible != null ? item.cantidadDisponible : (item.cantidad - (item.cantidadDevuelta || 0));
-                let cantRaw = parseInt(inputCantidad.value) || 0;
+                let cantRaw = parseInt(inputCantidad.value || "0", 10);
                 if (cantRaw < 0) cantRaw = 0;
                 if (cantRaw > maxDisp) {
                     cantRaw = maxDisp;
@@ -760,13 +859,12 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             const itemValido = checkbox && !checkbox.disabled && checkbox.checked && cantidadDevolver > 0;
+            const sEl = document.getElementById(`subtotal-${index}`);
             if (itemValido) {
                 const subtotal = cantidadDevolver * precio;
                 total += subtotal;
-                const sEl = document.getElementById(`subtotal-${index}`);
                 if (sEl) sEl.textContent = `$${subtotal.toFixed(2)}`;
             } else {
-                const sEl = document.getElementById(`subtotal-${index}`);
                 if (sEl) sEl.textContent = "$0.00";
             }
         });
@@ -776,18 +874,20 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function generarNotaCredito() {
-        const motivo = document.getElementById("motivoNotaCredito").value;
+        const motivoEl = document.getElementById("motivoNotaCredito");
+        const motivo = motivoEl ? motivoEl.value : "";
         const itemsSeleccionados = [];
         let tieneError = false;
 
         itemsFacturaNotaCredito.forEach((item, index) => {
             const checkbox = document.getElementById(`item-${index}`);
             const inputCantidad = document.getElementById(`cantidad-devolver-${index}`);
-            const precio = parseFloat(document.getElementById(`precio-${index}`).value) || 0;
+            const precioEl = document.getElementById(`precio-${index}`);
+            const precio = parseFloat(((precioEl && precioEl.value) || item.precio || 0));
 
             if (!checkbox || !inputCantidad) return;
 
-            let cantidadDevolver = parseInt(inputCantidad.value) || 0;
+            let cantidadDevolver = parseInt(inputCantidad.value || "0", 10);
             const maxDisp = item.cantidadDisponible != null ? item.cantidadDisponible : (item.cantidad - (item.cantidadDevuelta || 0));
 
             if (checkbox.checked || cantidadDevolver > 0) {
@@ -842,7 +942,7 @@ document.addEventListener("DOMContentLoaded", function() {
         };
 
         const itemsResumen = itemsSeleccionados.map(i =>
-            `<li><b>${i.nombreProducto}</b>: ${i.cantidad} ud × $${Number(i.precioUnitario).toLocaleString("es-CO", {minimumFractionDigits: 2})} = <b>$${Number(i.subtotal).toLocaleString("es-CO", {minimumFractionDigits: 2})}</b></li>`
+            `<li><b>${i.nombreProducto}</b>: ${i.cantidad} ud × ${fmtCOP2.format(Number(i.precioUnitario))} = <b>${fmtCOP2.format(Number(i.subtotal))}</b></li>`
         ).join("");
 
         Swal.fire({
@@ -856,7 +956,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     </ul>
                     <div style="margin-top: 14px; padding: 12px; background: #fff3cd; border-radius: 10px; font-size: 13px; color: #856404;">
                         ✅ Los productos devueltos <b>regresarán al stock</b> automáticamente.<br>
-                        ✅ El total de la factura <b>se reducirá en $${Number(totalCalculado).toLocaleString("es-CO", {minimumFractionDigits: 2})}</b>.
+                        ✅ El total de la factura <b>se reducirá en ${fmtCOP2.format(Number(totalCalculado))}</b>.
                     </div>
                 </div>
             `,
@@ -912,7 +1012,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     timer: 2200
                 }).then(() => {
                     cerrarModalNotaCredito();
-                    cargarFacturas();
+                    cargarFacturas(filtrosAplicados);
                 });
             })
             .catch(err => {
@@ -926,6 +1026,10 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+    // ---------- EXPORTS ----------
+    window.aplicarFiltros = aplicarFiltros;
+    window.resetearFiltros = resetearFiltros;
+    window.cargarFacturas = cargarFacturas;
     window.agregarItem = agregarItem;
     window.cerrarModal = cerrarModal;
     window.guardarEdicion = guardarEdicion;
@@ -938,9 +1042,44 @@ document.addEventListener("DOMContentLoaded", function() {
     window.abrirModalNotaCredito = abrirModalNotaCredito;
     window.cerrarModalNotaCredito = cerrarModalNotaCredito;
     window.generarNotaCredito = generarNotaCredito;
+    window.onCambiarCheckboxItem = onCambiarCheckboxItem;
+    window.onCambiarCantidadItem = onCambiarCantidadItem;
 
-    console.log("Inicializando facturas...");
-    cargarFacturas();
-    cargarProductos();
-    console.log("Facturas inicializadas");
-});
+    document.addEventListener("DOMContentLoaded", function () {
+        const usuarioStr = localStorage.getItem("usuario");
+        const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
+        if (!usuario) {
+            window.location.href = "login.html";
+            return;
+        }
+        if (usuario.rol !== "ADMIN" && usuario.rol !== "CARTERA") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Acceso denegado',
+                text: 'No tienes acceso a facturación'
+            }).then(() => {
+                window.location.href = "home.html";
+            });
+            return;
+        }
+
+        const selProducto = document.getElementById("nuevoProducto");
+        if (selProducto) {
+            selProducto.addEventListener("change", function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const precio = selectedOption && selectedOption.dataset ? selectedOption.dataset.precio : null;
+                const nuevoPrecioEl = document.getElementById("nuevoPrecio");
+                if (precio && nuevoPrecioEl) {
+                    nuevoPrecioEl.value = precio;
+                }
+            });
+        }
+
+        console.log("Inicializando facturas...");
+        cargarSelects();
+        cargarFacturas({});
+        cargarProductos();
+        console.log("Facturas inicializadas");
+    });
+
+})();

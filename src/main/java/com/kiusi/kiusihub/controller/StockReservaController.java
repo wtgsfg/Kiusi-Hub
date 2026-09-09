@@ -81,7 +81,7 @@ public class StockReservaController {
         List<Map<String, Object>> resp = new java.util.ArrayList<>();
         if (req.ajustes() != null) {
             for (AjusteRequest a : req.ajustes()) {
-                StockReservaService.AjusteRequest req2 = new StockReservaController.AjusteRequest(
+                AjusteRequest req2 = new AjusteRequest(
                         a.productoId(), req.vendedorUsername(), a.delta(), a.cantidadFinal());
                 StockReservaService.AjusteResult r;
                 if (req2.cantidadFinal() != null) {

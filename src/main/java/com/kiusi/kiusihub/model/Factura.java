@@ -9,6 +9,7 @@ public class Factura {
     private double total;
     private double pagado;
     private String nombreCliente;
+    private String vendedor;
     private String estado;
 
     public Factura() {
@@ -78,6 +79,14 @@ public class Factura {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public String getVendedor() {
+        return vendedor;
+    }
+
+    public void setVendedor(String vendedor) {
+        this.vendedor = vendedor;
     }
 
     public String getCliente() {
