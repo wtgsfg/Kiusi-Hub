@@ -494,6 +494,8 @@ document.addEventListener("DOMContentLoaded", function() {
     function pagar() {
         const facturaId = document.getElementById("facturaId").value;
         const monto = document.getElementById("monto").value;
+        const metodoPagoEl = document.getElementById("metodoPago");
+        const metodoPago = metodoPagoEl ? metodoPagoEl.value : "";
 
         if (!facturaId || !monto) {
             Swal.fire({
@@ -504,7 +506,12 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        fetch(`/api/recaudos?facturaId=${facturaId}&monto=${monto}`, {
+        let url = `/api/recaudos?facturaId=${facturaId}&monto=${monto}`;
+        if (metodoPago && metodoPago.trim()) {
+            url += `&metodoPago=${encodeURIComponent(metodoPago.trim())}`;
+        }
+
+        fetch(url, {
             method: "POST"
         })
         .then(res => {
@@ -517,17 +524,27 @@ document.addEventListener("DOMContentLoaded", function() {
                 }).then(() => {
                     document.getElementById("facturaId").value = "";
                     document.getElementById("monto").value = "";
+                    if (metodoPagoEl) metodoPagoEl.value = "";
                     cargarFacturas();
                 });
             } else {
-                throw new Error('Error al registrar');
+                return res.text().then(t => {
+                    let m = 'Error al registrar';
+                    try {
+                        const j = JSON.parse(t);
+                        if (j && j.error) m = String(j.error);
+                        else if (j && j.message) m = String(j.message);
+                        else if (t) m = t;
+                    } catch (_) { if (t) m = t; }
+                    throw new Error(m);
+                });
             }
         })
         .catch(err => {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Error al registrar el pago'
+                text: err.message || 'Error al registrar el pago'
             });
         });
     }

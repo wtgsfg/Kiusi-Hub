@@ -63,8 +63,30 @@ public class DatabaseMigrationRunner {
 
     @PostConstruct
     public void migrate() {
-        System.out.println("\n===== KiusiHub DB Migration (notas_credito) =====");
+        System.out.println("\n===== KiusiHub DB Migration (notas_credito, recaudos) =====");
         try {
+            // --- RECAUDOS ---
+            safeExec("CREATE recaudos IF NOT EXISTS",
+                    "CREATE TABLE IF NOT EXISTS recaudos (" +
+                            "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                            "factura_id BIGINT NOT NULL, " +
+                            "monto DOUBLE NOT NULL, " +
+                            "fecha DATETIME, " +
+                            "metodo_pago VARCHAR(64))");
+            if (!columnExists("recaudos", "metodo_pago")) {
+                safeExec("recaudos ADD metodo_pago VARCHAR(64)",
+                        "ALTER TABLE recaudos ADD COLUMN metodo_pago VARCHAR(64)");
+            }
+            if (!columnExists("recaudos", "fecha")) {
+                safeExec("recaudos ADD fecha DATETIME",
+                        "ALTER TABLE recaudos ADD COLUMN fecha DATETIME");
+            }
+            if (!columnExists("recaudos", "factura_id")) {
+                safeExec("recaudos ADD factura_id BIGINT",
+                        "ALTER TABLE recaudos ADD COLUMN factura_id BIGINT NOT NULL DEFAULT 0");
+            }
+
+            // --- NOTAS CREDITO ---
             // 1. Crear tablas si no existen
             safeExec("CREATE notas_credito IF NOT EXISTS",
                     "CREATE TABLE IF NOT EXISTS notas_credito (" +

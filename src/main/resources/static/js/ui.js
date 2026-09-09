@@ -175,12 +175,14 @@
                 add("index.html", "Productos", "📦");
                 add("pedidos.html", "Pedidos", "📋");
                 add("facturas.html", "Facturas", "🧾");
+                add("recaudos.html", "Recaudos", "💰");
                 add("notas-credito.html", "Notas Crédito", "💳");
                 add("bodeguero.html", "Bodega", "🏪");
             } else if (esVendedor) {
                 add("pedidos.html", "Pedidos", "📋");
             } else if (esCartera) {
                 add("facturas.html", "Facturas", "🧾");
+                add("recaudos.html", "Recaudos", "💰");
                 add("notas-credito.html", "Notas Crédito", "💳");
             } else if (esBodeguero) {
                 add("bodeguero.html", "Bodega", "🏪");
